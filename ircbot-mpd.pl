@@ -84,8 +84,13 @@ while (1) {
 
     $conn->reg_cb(
         registered => sub {
-            print "Connected, joining channels\n";
+            say "Connected, joining channels";
             $conn->send_srv(JOIN => $_) for @channels;
+
+            # Send a PING every 30 seconds. If no PONG is received within
+            # another 30 seconds, the connection will be closed and a reconnect
+            # will be triggered.
+            $conn->enable_ping(30);
         });
 
     $conn->reg_cb(disconnect => sub { $c->broadcast });
