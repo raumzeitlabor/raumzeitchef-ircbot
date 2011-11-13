@@ -18,7 +18,7 @@ To run the bot on your local machine, use `perl -Ilib bin/ircbot-mpd`. Note
 that you need to edit **lib/RaumZeitLabor/IRC/MPD.pm** as it is hard-coded for
 the RaumZeitLabor environment.
 
-Creating a Debian package
+Building a Debian package
 -------------------------
 The preferred way to deploy code on the Blackbox (where this bot traditionally
 runs on) is by installing a Debian package. This has many advantages:
@@ -33,24 +33,37 @@ runs on) is by installing a Debian package. This has many advantages:
    of initscripts, configuration and source code can be displayed by `dpkg -L
    raumzeitmpd-ircbot`.
 
-Fortunately, creating a Debian package is easy. First, install the packaging
-tools we are going to use:
+To create a Debian package, ensure you have `dpkg-dev` installed, then run:
 <pre>
-apt-get install dpkg-dev dh-make-perl
-</pre>
-
-Then, run the following commands (you might need to install RaumZeitMPD’s build
-dependencies, but you will be told so):
-<pre>
-perl Makefile.PL
-make distdir
-cd RaumZeitMPD-1.0
-dh-make-perl -p raumzeitmpd-ircbot --source-format 1
 dpkg-buildpackage
 </pre>
 
 Now you have a package called `raumzeitmpd-ircbot_1.0-1_all.deb` which you can
 deploy on the Blackbox.
+
+Updating the Debian packaging
+-----------------------------
+
+If you introduce new dependencies, bump the version or change the description,
+you have to update the Debian packaging. First, install the packaging tools we
+are going to use:
+<pre>
+apt-get install dh-make-perl
+</pre>
+
+Then, run the following commands:
+<pre>
+perl Makefile.PL
+dh-make-perl refresh -p raumzeitmpd-ircbot --exclude debian
+</pre>
+
+**Alternatively**, you can also recreate the Debian packaging from scratch:
+<pre>
+mv debian/raumzeitmpd-ircbot.{init,postinst} .
+rm -rf debian
+dh-make-perl -p raumzeitmpd-ircbot --source-format 1
+mv raumzeitmpd-ircbot.{init,postinst} debian/
+</pre>
 
 See also
 --------

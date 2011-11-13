@@ -1,0 +1,28 @@
+Source: raumzeitmpd-ircbot
+Section: perl
+Priority: optional
+Maintainer: Michael Stapelberg <michael@stapelberg.de>
+Build-Depends: debhelper (>= 8)
+Build-Depends-Indep: libanyevent-irc-perl,
+ libanyevent-perl,
+ libaudio-mpd-perl,
+ libio-all-lwp-perl,
+ libio-all-perl,
+ perl
+Standards-Version: 3.9.2
+Homepage: http://search.cpan.org/dist/RaumZeitMPD/
+
+Package: raumzeitmpd-ircbot
+Architecture: all
+Depends: ${misc:Depends}, ${perl:Depends},
+ libanyevent-irc-perl,
+ libanyevent-perl,
+ libaudio-mpd-perl,
+ libio-all-lwp-perl,
+ libio-all-perl,
+ perl
+Description: RaumZeitMPD IRC bot
+ RaumZeitMPD is an IRC bot (nickname RaumZeitMPD) which displays the currently
+ playing song (querying the MPD) upon !stream and enables a light upon !ping.
+ .
+ This description was automagically extracted from the module by dh-make-perl.
