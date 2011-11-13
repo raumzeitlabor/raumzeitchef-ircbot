@@ -5,6 +5,8 @@ package RaumZeitLabor::IRC::MPD;
 use strict;
 use warnings;
 use v5.10;
+# These modules are in core:
+use Sys::Syslog;
 # All these modules are not in core:
 use AnyEvent;
 use AnyEvent::IRC::Client;
@@ -19,7 +21,7 @@ sub mpd_play_existing_song {
     my @items = $playlist->as_items;
     for my $item (@items) {
         next if $item->file ne $url;
-        say "Found $url (file is " . $item->file . ", id is " . $item->id . "), playing";
+        syslog('info', "Found $url (file is " . $item->file . ", id is " . $item->id . "), playing");
         $mpd->playid($item->id);
         return 1;
     }
@@ -29,23 +31,23 @@ sub mpd_play_existing_song {
 sub mpd_change_url {
     my $url = shift;
     my $mpd = Audio::MPD->new({ host => 'mpd.rzl' });
-    say "Connected to mpd.rzl.";
+    syslog('info', 'Connected to mpd.rzl.');
 
     my $playlist = $mpd->playlist;
 
     if (!mpd_play_existing_song($mpd, $playlist, $url)) {
-        say "Adding $url to playlist";
+        syslog('info', "Adding $url to playlist");
         $playlist->add($url);
         $playlist = $mpd->playlist;
         if (!mpd_play_existing_song($mpd, $playlist, $url)) {
-            say "err, what?";
+            syslog('info', "$url was not added?!");
         }
     }
 }
 
 sub mpd_current_song {
     my $mpd = Audio::MPD->new({ host => 'mpd.rzl' });
-    say "Connected to mpd.rzl.";
+    syslog('info', 'Connected to mpd.rzl.');
 
     my $song = $mpd->current;
     my $name;
@@ -75,15 +77,18 @@ sub run {
     my $disable_timer = undef;
     my $disable_bell = undef;
 
+    openlog('ircbot-mpd', 'pid', 'daemon');
+    syslog('info', 'Starting up');
+
     while (1) {
-        print "Connecting...\n";
+        syslog('info', "Connecting to $server as $nick...");
         my $old_status = "";
         my $c = AnyEvent->condvar;
         my $conn = AnyEvent::IRC::Client->new;
 
         $conn->reg_cb(
             registered => sub {
-                say "Connected, joining channels";
+                syslog('info', 'Connected, joining channels');
                 $conn->send_srv(JOIN => $_) for @channels;
 
                 # Send a PING every 30 seconds. If no PONG is received within
@@ -114,21 +119,21 @@ sub run {
                 }
 
                 if ($text =~ /^!ping/) {
-                    print "time = " . time() . ", last_ping = $last_ping, diff = " . (time() - $last_ping) . "\n";
                     if ((time() - $last_ping) < 180) {
+                        syslog('info', '!ping ignored');
                         if (!$said_idiot) {
                             $conn->send_chan($channel, 'PRIVMSG', ($channel, "Hey! Nur einmal alle 3 Minuten!"));
                             $said_idiot = 1;
                         }
                     } else {
                         $last_ping = time();
-                        print "last_ping = $last_ping\n";
                         $said_idiot = 0;
                         '1' > io('http://172.22.36.1:5000/port/8');
                         $conn->send_chan($channel, 'PRIVMSG', ($channel, "Die Rundumleuchte wurde für 5 Sekunden aktiviert"));
                         $disable_timer = AnyEvent->timer(after => 5, cb => sub {
                             '0' > io('http://172.22.36.1:5000/port/8');
                         });
+                        syslog('info', '!ping executed');
                     }
                 }
             });
@@ -137,6 +142,7 @@ sub run {
         $c->wait;
 
         # Wait 5 seconds before reconnecting, else we might get banned
+        syslog('info', 'Connection lost.');
         sleep 5;
     }
 }
