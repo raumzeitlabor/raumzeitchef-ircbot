@@ -5,7 +5,7 @@ This git repository contains the source for the RaumZeitMPD IRC bot. It
 consists of two files:
 
 <dl>
-  <dt>bin/ircbot-mpd</dt>
+  <dt>script/ircbot-mpd</dt>
   <dd>A simple script to run the IRC bot, providing --version.</dd>
 
   <dt>lib/RaumZeitLabor/IRC/MPD.pm</dt>
@@ -14,7 +14,7 @@ consists of two files:
 
 Development
 -----------
-To run the bot on your local machine, use `perl -Ilib bin/ircbot-mpd`. Note
+To run the bot on your local machine, use `./script/ircbot-mpd`. Note
 that you need to edit **lib/RaumZeitLabor/IRC/MPD.pm** as it is hard-coded for
 the RaumZeitLabor environment.
 
