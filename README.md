@@ -65,6 +65,10 @@ dh-make-perl -p raumzeitmpd-ircbot --source-format 1
 mv raumzeitmpd-ircbot.{init,postinst} debian/
 </pre>
 
+By the way, the originals for raumzeitmpd-ircbot.{init,postinst} are
+`/usr/share/debhelper/dh_make/debian/init.d.ex` and
+`/usr/share/debhelper/dh_make/debian/postinst.ex`.
+
 See also
 --------
 
