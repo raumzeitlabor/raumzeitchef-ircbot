@@ -1,0 +1,4 @@
+# Log all lines from ircbot-mpd to /var/log/ircbot-mpd.log (without syncing)
+# and discard them.
+:programname, isequal, "ircbot-mpd"  -/var/log/ircbot-mpd.log
+:programname, isequal, "ircbot-mpd" ~

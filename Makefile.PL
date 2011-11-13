@@ -29,7 +29,8 @@ pure_install:: extra_install
 install_vendor:: extra_install
 
 extra_install:
-	install -d $(DESTDIR)/etc/init.d
+	install -d $(DESTDIR)/etc/init.d $(DESTDIR)/etc/rsyslog.d/
 	install -m 755 ircbot-mpd.init $(DESTDIR)/etc/init.d/ircbot-mpd
+	install -m 755 ircbot-mpd.rsyslog $(DESTDIR)/etc/rsyslog.d/ircbot-mpd.conf
     }
 }
