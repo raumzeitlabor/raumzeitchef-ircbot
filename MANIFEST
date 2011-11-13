@@ -1,6 +1,8 @@
 bin/ircbot-mpd
 ircbot-mpd.init
+ircbot-mpd.rsyslog
 lib/RaumZeitLabor/IRC/MPD.pm
 LICENSE
 Makefile.PL
 MANIFEST			This list of files
+README.md
