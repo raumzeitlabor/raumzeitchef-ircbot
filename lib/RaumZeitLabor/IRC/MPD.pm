@@ -92,7 +92,7 @@ sub run {
 
                 if (defined($err)) {
                     syslog('info', "Connect error: $err");
-                    $c->broadcast;
+                    $c->send;
                     return;
                 }
             });
@@ -108,7 +108,7 @@ sub run {
                 $conn->enable_ping(30);
             });
 
-        $conn->reg_cb(disconnect => sub { $c->broadcast });
+        $conn->reg_cb(disconnect => sub { $c->send });
 
         $conn->reg_cb(
             publicmsg => sub {
@@ -150,7 +150,7 @@ sub run {
             });
 
         $conn->connect($server, $port, { nick => $nick, user => 'mpd' });
-        $c->wait;
+        $c->recv;
 
         # Wait 5 seconds before reconnecting, else we might get banned
         syslog('info', 'Connection lost.');
