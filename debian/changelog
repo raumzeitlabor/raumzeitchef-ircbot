@@ -1,5 +1,5 @@
-raumzeitmpd-ircbot (1.0-1) unstable; urgency=low
+raumzeitmpd-ircbot (1.1-1) unstable; urgency=low
 
   * Initial Release.
 
- -- Michael Stapelberg <michael@stapelberg.de>  Sun, 13 Nov 2011 11:35:37 +0000
+ -- Michael Stapelberg <michael@stapelberg.de>  Mon, 14 Nov 2011 20:15:28 +0000

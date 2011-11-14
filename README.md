@@ -54,11 +54,6 @@ apt-get install dh-make-perl
 Then, run the following commands:
 <pre>
 perl Makefile.PL
-dh-make-perl refresh -p raumzeitmpd-ircbot --exclude debian
-</pre>
-
-**Alternatively**, you can also recreate the Debian packaging from scratch:
-<pre>
 mv debian/raumzeitmpd-ircbot.{init,postinst} .
 rm -rf debian
 dh-make-perl -p raumzeitmpd-ircbot --source-format 1
