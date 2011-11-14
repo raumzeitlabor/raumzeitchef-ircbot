@@ -13,7 +13,7 @@ use AnyEvent::IRC::Client;
 use Audio::MPD;
 use IO::All;
 
-our $VERSION = '1.0';
+our $VERSION = '1.1';
 
 sub mpd_play_existing_song {
     my ($mpd, $playlist, $url) = @_;
@@ -174,7 +174,7 @@ playing song (querying the MPD) upon !stream and enables a light upon !ping.
 
 =head1 VERSION
 
-Version 1.0
+Version 1.1
 
 =head1 AUTHOR
 
