@@ -87,6 +87,17 @@ sub run {
         my $conn = AnyEvent::IRC::Client->new;
 
         $conn->reg_cb(
+            connect => sub {
+                my ($conn, $err) = @_;
+
+                if (defined($err)) {
+                    syslog('info', "Connect error: $err");
+                    $c->broadcast;
+                    return;
+                }
+            });
+
+        $conn->reg_cb(
             registered => sub {
                 syslog('info', 'Connected, joining channels');
                 $conn->send_srv(JOIN => $_) for @channels;
