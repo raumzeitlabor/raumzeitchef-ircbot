@@ -22,7 +22,7 @@ install_vendor:: extra_install
 
 extra_install:
 	install -d $(DESTDIR)/etc/rsyslog.d/
-	install -m 755 ircbot-mpd.rsyslog $(DESTDIR)/etc/rsyslog.d/ircbot-mpd.conf
+	install -m 644 ircbot-mpd.rsyslog $(DESTDIR)/etc/rsyslog.d/ircbot-mpd.conf
 END_OF_MAKEFILE
 
 WriteAll;
