@@ -9,11 +9,11 @@ use v5.10;
 use Sys::Syslog;
 # All these modules are not in core:
 use AnyEvent;
+use AnyEvent::HTTP;
 use AnyEvent::IRC::Client;
 use Audio::MPD;
-use IO::All;
 
-our $VERSION = '1.1';
+our $VERSION = '1.2';
 
 sub mpd_play_existing_song {
     my ($mpd, $playlist, $url) = @_;
@@ -139,10 +139,12 @@ sub run {
                     } else {
                         $last_ping = time();
                         $said_idiot = 0;
-                        '1' > io('http://172.22.36.1:5000/port/8');
+                        my $post;
+                        $post = http_post 'http://172.22.36.1:5000/port/8', '1', sub { say "Port 8 am NPM aktiviert!"; undef $post; };
                         $conn->send_chan($channel, 'PRIVMSG', ($channel, "Die Rundumleuchte wurde für 5 Sekunden aktiviert"));
                         $disable_timer = AnyEvent->timer(after => 5, cb => sub {
-                            '0' > io('http://172.22.36.1:5000/port/8');
+                            my $post;
+                            $post = http_post 'http://172.22.36.1:5000/port/8', '0', sub { say "Port 8 am NPM aktiviert!"; undef $post; };
                         });
                         syslog('info', '!ping executed');
                     }

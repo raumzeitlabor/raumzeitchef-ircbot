@@ -8,10 +8,9 @@ name     'RaumZeitMPD';
 all_from 'lib/RaumZeitLabor/IRC/MPD.pm';
 
 requires 'AnyEvent';
+requires 'AnyEvent::HTTP';
 requires 'AnyEvent::IRC';
 requires 'Audio::MPD';
-requires 'IO::All';
-requires 'IO::All::LWP';
 
 install_script 'ircbot-mpd';
 
