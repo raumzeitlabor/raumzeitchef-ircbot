@@ -11,6 +11,7 @@ requires 'AnyEvent';
 requires 'AnyEvent::HTTP';
 requires 'AnyEvent::IRC';
 requires 'Audio::MPD';
+requires 'JSON::XS';
 
 install_script 'ircbot-mpd';
 

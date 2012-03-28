@@ -12,8 +12,9 @@ use AnyEvent;
 use AnyEvent::HTTP;
 use AnyEvent::IRC::Client;
 use Audio::MPD;
+use JSON::XS;
 
-our $VERSION = '1.2';
+our $VERSION = '1.4';
 
 sub mpd_play_existing_song {
     my ($mpd, $playlist, $url) = @_;
@@ -138,6 +139,23 @@ sub run {
                         }
                     } else {
                         $last_ping = time();
+                        my ($remaining) = ($text =~ /^!ping (.*)/);
+                        if (defined($remaining)) {
+                            my $user = $ircmsg->{prefix};
+                            my $nick = AnyEvent::IRC::Util::prefix_nick($user);
+
+                            my $body = encode_json({
+                                text => $remaining,
+                                from => $nick,
+                                time => '23:02',
+                            });
+                            my $guard;
+                            $guard = http_post 'http://blackbox.raumzeitlabor.de/pingplus/', $body, sub {
+                                undef $guard;
+                            };
+                        }
+
+
                         $said_idiot = 0;
                         my $post;
                         $post = http_post 'http://172.22.36.1:5000/port/8', '1', sub { say "Port 8 am NPM aktiviert!"; undef $post; };
