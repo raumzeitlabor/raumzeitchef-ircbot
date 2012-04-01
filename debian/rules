@@ -1,4 +1,9 @@
 #!/usr/bin/make -f
 
+override_dh_auto_install:
+	dh_auto_install
+	rm -rf debian/raumzeitmpd-ircbot/usr/lib/perl
+	rm -rf debian/raumzeitmpd-ircbot/usr/lib/perl5
+
 %:
 	dh $@

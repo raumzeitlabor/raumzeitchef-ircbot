@@ -1,12 +1,13 @@
 package RaumZeitLabor::IRC::MPD;
 # vim:ts=4:sw=4:expandtab
-# © 2010-2011 Michael Stapelberg (see also: LICENSE)
+# © 2010-2012 Michael Stapelberg (see also: LICENSE)
 
 use strict;
 use warnings;
 use v5.10;
 # These modules are in core:
 use Sys::Syslog;
+use POSIX qw(strftime);
 # All these modules are not in core:
 use AnyEvent;
 use AnyEvent::HTTP;
@@ -14,7 +15,7 @@ use AnyEvent::IRC::Client;
 use Audio::MPD;
 use JSON::XS;
 
-our $VERSION = '1.4';
+our $VERSION = '1.5';
 
 sub mpd_play_existing_song {
     my ($mpd, $playlist, $url) = @_;
@@ -139,6 +140,8 @@ sub run {
                         }
                     } else {
                         $last_ping = time();
+                        # Remaining text will be sent to Ping+, see:
+                        # https://raumzeitlabor.de/wiki/Ping+
                         my ($remaining) = ($text =~ /^!ping (.*)/);
                         if (defined($remaining)) {
                             my $user = $ircmsg->{prefix};
@@ -147,7 +150,7 @@ sub run {
                             my $body = encode_json({
                                 text => $remaining,
                                 from => $nick,
-                                time => '23:02',
+                                time => strftime("%H:%M", localtime(time())),
                             });
                             my $guard;
                             $guard = http_post 'http://blackbox.raumzeitlabor.de/pingplus/', $body, sub {
@@ -194,7 +197,7 @@ playing song (querying the MPD) upon !stream and enables a light upon !ping.
 
 =head1 VERSION
 
-Version 1.1
+Version 1.5
 
 =head1 AUTHOR
 
@@ -202,7 +205,7 @@ Michael Stapelberg, C<< <michael at stapelberg.de> >>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2010-2011 Michael Stapelberg.
+Copyright 2010-2012 Michael Stapelberg.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the BSD license.
