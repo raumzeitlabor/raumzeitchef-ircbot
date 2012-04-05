@@ -15,7 +15,7 @@ use AnyEvent::IRC::Client;
 use Audio::MPD;
 use JSON::XS;
 
-our $VERSION = '1.5';
+our $VERSION = '1.6';
 
 sub mpd_play_existing_song {
     my ($mpd, $playlist, $url) = @_;
@@ -161,11 +161,29 @@ sub run {
 
                         $said_idiot = 0;
                         my $post;
-                        $post = http_post 'http://172.22.36.1:5000/port/8', '1', sub { say "Port 8 am NPM aktiviert!"; undef $post; };
+                        my $epost;
+                        # Zuerst den Raum-Ping (Port 8 am NPM), dann den Ping
+                        # in der E-Ecke aktivieren (Port 3 am NPM).
+                        $post = http_post 'http://172.22.36.1:5000/port/8', '1', sub {
+                            say "Port 8 am NPM aktiviert!";
+                            undef $post;
+                            $epost = http_post 'http://172.22.36.1:5000/port/3', '1', sub {
+                                say "Port 3 am NPM aktiviert!";
+                                undef $epost;
+                            };
+                        };
                         $conn->send_chan($channel, 'PRIVMSG', ($channel, "Die Rundumleuchte wurde für 5 Sekunden aktiviert"));
                         $disable_timer = AnyEvent->timer(after => 5, cb => sub {
                             my $post;
-                            $post = http_post 'http://172.22.36.1:5000/port/8', '0', sub { say "Port 8 am NPM aktiviert!"; undef $post; };
+                            my $epost;
+                            $post = http_post 'http://172.22.36.1:5000/port/8', '0', sub {
+                                say "Port 8 am NPM deaktiviert!";
+                                undef $post;
+                                $epost = http_post 'http://172.22.36.1:5000/port/3', '0', sub {
+                                    say "Port 3 am NPM deaktiviert!";
+                                    undef $epost;
+                                };
+                            };
                         });
                         syslog('info', '!ping executed');
                     }
@@ -197,7 +215,7 @@ playing song (querying the MPD) upon !stream and enables a light upon !ping.
 
 =head1 VERSION
 
-Version 1.5
+Version 1.6
 
 =head1 AUTHOR
 
