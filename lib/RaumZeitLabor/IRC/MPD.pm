@@ -11,6 +11,7 @@ use POSIX qw(strftime);
 # All these modules are not in core:
 use AnyEvent;
 use AnyEvent::HTTP;
+use AnyEvent::HTTPD;
 use AnyEvent::IRC::Client;
 use Audio::MPD;
 use JSON::XS;
@@ -87,6 +88,29 @@ sub run {
         my $old_status = "";
         my $c = AnyEvent->condvar;
         my $conn = AnyEvent::IRC::Client->new;
+        my $httpd = AnyEvent::HTTPD->new(host => '127.0.0.1', port => 9091);
+
+        $httpd->reg_cb(
+            '/to_irc' => sub {
+                my ($httpd, $req) = @_;
+
+                if (!defined($req->{'content'})) {
+                    $req->respond({ content => [
+                        'text/plain',
+                        'No content received. Please post JSON'
+                    ]});
+                    return;
+                }
+
+                my $decoded = decode_json($req->{'content'});
+                $conn->send_chan($channels[0], 'PRIVMSG', ($channels[0], $decoded->{message}));
+
+                $req->respond({ content => [
+                    'text/html',
+                    '{"success":true}'
+                ]});
+            }
+        );
 
         $conn->reg_cb(
             connect => sub {
