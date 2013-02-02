@@ -158,10 +158,12 @@ sub run {
                         mpd_change_url($url);
                     }
                 }
-                if ($text =~ /^!help/) {
-                    $conn->send_chan($channel, 'PRIVMSG', ($channel, "Enter !stream <url> to set Stream."));
-                    $conn->send_chan($channel, 'PRIVMSG', ($channel, "Enter !stream to see what's playing."));
-                }
+
+                # disabled
+                #if ($text =~ /^!help/) {
+                #    $conn->send_chan($channel, 'PRIVMSG', ($channel, "Enter !stream <url> to set Stream."));
+                #    $conn->send_chan($channel, 'PRIVMSG', ($channel, "Enter !stream to see what's playing."));
+                #}
 
                 if ($text =~ /^!ping/) {
                     $conn->send_chan($channel, 'PRIVMSG', ($channel, "Der Ping+ ist momentan nicht verfügbar."));
@@ -236,7 +238,7 @@ sub run {
                     my $time = strftime("%H:%M", localtime(time()));
                     my $reminder;
                     $reminder = AnyEvent->timer(after => $reminder_timeout, cb => sub {
-                        $conn->send_chan($channel, 'PRIVMSG', ($channel, "Reminder: $reminder_subject ($time Uhr)"));
+                        $conn->send_chan($channel, 'PRIVMSG', ($channel, "$reminder_target: Reminder: $reminder_subject ($time Uhr)"));
                         undef $reminder;
                     });
                     $conn->send_chan($channel, 'PRIVMSG', ($channel, "Alles klar."));
