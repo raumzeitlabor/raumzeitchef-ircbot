@@ -239,10 +239,11 @@ sub run {
                     my $time = strftime("%H:%M", localtime(time()));
                     my $reminder;
                     $reminder = AnyEvent->timer(after => $reminder_timeout, cb => sub {
-                        $conn->send_chan($channel, 'PRIVMSG', ($channel, "$reminder_target: Reminder: $reminder_subject ($time Uhr)"));
+                        $conn->send_chan($channel, 'PRIVMSG', ($channel, "Reminder für $reminder_target: $reminder_subject ($time Uhr)"));
                         undef $reminder;
                     });
-                    $conn->send_chan($channel, 'PRIVMSG', ($channel, "Alles klar."));
+                    @answers = ("Alles klar.", "Yup.", "Okidoki.", "Eyup.", "Roger");
+                    $conn->send_chan($channel, 'PRIVMSG', ($channel, $answers[rand @answers]));
                 }
 
                 # timer mit ping+ (auf 1 user begrenzt)
@@ -292,8 +293,8 @@ sub run {
                         return;
                     }
 
-                    $conn->send_chan($channel, 'PRIVMSG', ($channel, "Dein Timer \"$pizza_timer_subject\" "
-                            ."wurde mit einem Timeout von $pizza_timer_minutes Minuten registriert."));
+                    @answers = ("Alles klar.", "Yup.", "Okidoki.", "Eyup.", "Roger");
+                    $conn->send_chan($channel, 'PRIVMSG', ($channel, $answers[rand @answers]));
 
                     my ($post, $epost);
                     $pizza_timer = AnyEvent->timer(after => $pizza_timer_minutes * 60, cb => sub {
@@ -318,7 +319,7 @@ sub run {
                         };
 
                         $conn->send_chan($channel, 'PRIVMSG', ($channel,
-                            "$pizza_timer_user: *beep* *beep* Dein Timer \"$pizza_timer_subject\" ist abgelaufen."));
+                            "*beep* *beep* $pizza_timer_user, dein Timer \"$pizza_timer_subject\" ist abgelaufen."));
 
                         $pizza_disable_timer = AnyEvent->timer(after => 5, cb => sub {
                             my $post;
