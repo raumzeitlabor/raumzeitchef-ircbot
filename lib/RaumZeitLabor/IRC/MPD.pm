@@ -224,6 +224,25 @@ sub run {
                     }
                 }
 
+                # timer ohne ping+ (irc-only)
+                if ($text =~ /^!erinner (.+) an (.+) in (\d+)(m|s)/) {
+                    my $reminder_target = $1;
+                    if ($reminder_target eq 'mich') {
+                        $reminder_target = AnyEvent::IRC::Util::prefix_nick($ircmsg->{prefix});
+                    }
+                    my $reminder_subject = $2;
+                    my $reminder_timeout = $3;
+                    $reminder_timeout *= 60 if ($4 eq 'm');
+                    my $time = strftime("%H:%M", localtime(time()));
+                    my $reminder;
+                    $reminder = AnyEvent->timer(after => $reminder_timeout, cb => sub {
+                        $conn->send_chan($channel, 'PRIVMSG', ($channel, "Reminder: $reminder_subject ($time Uhr)"));
+                        undef $reminder;
+                    });
+                    $conn->send_chan($channel, 'PRIVMSG', ($channel, "Alles klar."));
+                }
+
+                # timer mit ping+ (auf 1 user begrenzt)
                 if ($text =~ /^!timer cancel/) {
                     if (!$pizza_timer) {
                         $conn->send_chan($channel, 'PRIVMSG', ($channel, "Es läuft momentan kein Timer."));
@@ -275,6 +294,17 @@ sub run {
 
                     my ($post, $epost);
                     $pizza_timer = AnyEvent->timer(after => $pizza_timer_minutes * 60, cb => sub {
+                        my $body = encode_json({
+                            text => "Timer abgelaufen: \"$pizza_timer_subject\"",
+                            from => $pizza_timer_user,
+                            time => strftime("%H:%M", localtime(time())),
+                        });
+
+                        my $guard;
+                        $guard = http_post 'http://blackbox.raumzeitlabor.de/pingplus/', $body, sub {
+                            undef $guard;
+                        };
+
                         $post = http_post 'http://172.22.36.1:5000/port/8', '1', sub {
                             say "Port 8 am NPM aktiviert!";
                             undef $post;
