@@ -73,7 +73,7 @@ sub mpd_current_song {
 sub run {
     my $server = "irc.hackint.net";
     my $port = 6667;
-    my $nick = "RaumZeitMPD";
+    my $nick = "RaumZeitChef";
     my @channels = ('#raumzeitlabor1');
     my $ping_freq = 180; # in seconds
     my $last_ping = 0;
