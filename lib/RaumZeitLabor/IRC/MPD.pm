@@ -74,7 +74,7 @@ sub run {
     my $server = "irc.hackint.net";
     my $port = 6667;
     my $nick = "RaumZeitChef";
-    my @channels = ('#raumzeitlabor1');
+    my @channels = ('#raumzeitlabor');
     my $ping_freq = 180; # in seconds
     my $last_ping = 0;
     my $said_idiot = 0;
