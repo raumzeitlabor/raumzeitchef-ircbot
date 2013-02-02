@@ -156,6 +156,9 @@ sub run {
                 }
 
                 if ($text =~ /^!ping/) {
+                    $conn->send_chan($channel, 'PRIVMSG', ($channel, "Der Ping+ ist momentan nicht verfügbar."));
+                    return;
+
                     if ((time() - $last_ping) < 180) {
                         syslog('info', '!ping ignored');
                         if (!$said_idiot) {
