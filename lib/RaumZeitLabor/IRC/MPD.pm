@@ -227,7 +227,7 @@ sub run {
                 }
 
                 # timer ohne ping+ (irc-only)
-                if ($text =~ /^!erinner (.+) an (.+) in (\d+)(m|s)/) {
+                if ($text =~ /^!erinner (.+) an (.+) in (\d+)(h|m|s)/) {
                     my $reminder_target = $1;
                     if ($reminder_target eq 'mich') {
                         $reminder_target = AnyEvent::IRC::Util::prefix_nick($ircmsg->{prefix});
@@ -235,6 +235,7 @@ sub run {
                     my $reminder_subject = $2;
                     my $reminder_timeout = $3;
                     $reminder_timeout *= 60 if ($4 eq 'm');
+                    $reminder_timeout *= 3600 if ($4 eq 'h');
                     my $time = strftime("%H:%M", localtime(time()));
                     my $reminder;
                     $reminder = AnyEvent->timer(after => $reminder_timeout, cb => sub {
