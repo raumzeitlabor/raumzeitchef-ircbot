@@ -74,11 +74,19 @@ sub run {
     my $server = "irc.hackint.net";
     my $port = 6667;
     my $nick = "RaumZeitMPD";
-    my @channels = ('#raumzeitlabor');
+    my @channels = ('#raumzeitlabor1');
+    my $ping_freq = 180; # in seconds
     my $last_ping = 0;
     my $said_idiot = 0;
     my $disable_timer = undef;
     my $disable_bell = undef;
+
+    # pizza timer
+    my $pizza_timer_user;
+    my $pizza_timer_subject;
+    my $pizza_timer_minutes;
+    my $pizza_timer = undef;
+    my $pizza_disable_timer = undef; # timer used for disabling ping+
 
     openlog('ircbot-mpd', 'pid', 'daemon');
     syslog('info', 'Starting up');
@@ -159,7 +167,7 @@ sub run {
                     $conn->send_chan($channel, 'PRIVMSG', ($channel, "Der Ping+ ist momentan nicht verfügbar."));
                     return;
 
-                    if ((time() - $last_ping) < 180) {
+                    if ((time() - $last_ping) < $ping_freq) {
                         syslog('info', '!ping ignored');
                         if (!$said_idiot) {
                             $conn->send_chan($channel, 'PRIVMSG', ($channel, "Hey! Nur einmal alle 3 Minuten!"));
@@ -214,6 +222,88 @@ sub run {
                         });
                         syslog('info', '!ping executed');
                     }
+                }
+
+                if ($text =~ /^!timer cancel/) {
+                    if (!$pizza_timer) {
+                        $conn->send_chan($channel, 'PRIVMSG', ($channel, "Es läuft momentan kein Timer."));
+                        return;
+                    }
+
+                    my $msguser = AnyEvent::IRC::Util::prefix_nick($ircmsg->{prefix});
+                    if ($pizza_timer_user eq $msguser) {
+                        undef $pizza_timer;
+                        $conn->send_chan($channel, 'PRIVMSG', ($channel,
+                                "Dein Timer \"$pizza_timer_subject\", $pizza_timer_minutes Minuten "
+                                ."wurde deaktiviert."));
+                        return;
+                    }
+
+                    $conn->send_chan($channel, 'PRIVMSG', ($channel,
+                            "Der Timer \"$pizza_timer_subject\", $pizza_timer_minutes Minuten "
+                            ."kann nur von $pizza_timer_user deaktiviert werden."));
+                    return;
+                } elsif ($text =~ /^!timer (\d+) (.+)/ || $text =~ /^!pizza/) {
+                    if ($pizza_timer) {
+                        $conn->send_chan($channel, 'PRIVMSG', ($channel,
+                                "Es läuft bereits ein Timer von $pizza_timer_user "
+                                ."(\"$pizza_timer_subject\", $pizza_timer_minutes Minuten)."));
+                        return;
+                    }
+
+                    $pizza_timer_user = AnyEvent::IRC::Util::prefix_nick($ircmsg->{prefix});
+
+                    if ($text =~ /^!pizza/) {
+                        $pizza_timer_minutes = 15;
+                        $pizza_timer_subject = 'Pizza';
+                    } else {
+                        $pizza_timer_minutes = $1;
+                        $pizza_timer_subject = $2;
+                    }
+
+                    if ($pizza_timer_minutes * 60 < $ping_freq) {
+                        $conn->send_chan($channel, 'PRIVMSG', ($channel, "Das Timeout ist zu klein."));
+                        return;
+                    }
+                    if ($pizza_timer_minutes > 30) {
+                        $conn->send_chan($channel, 'PRIVMSG', ($channel, "Das Timeout ist zu groß."));
+                        return;
+                    }
+
+                    $conn->send_chan($channel, 'PRIVMSG', ($channel, "Dein Timer \"$pizza_timer_subject\" "
+                            ."wurde mit einem Timeout von $pizza_timer_minutes Minuten registriert."));
+
+                    my ($post, $epost);
+                    $pizza_timer = AnyEvent->timer(after => $pizza_timer_minutes * 60, cb => sub {
+                        $post = http_post 'http://172.22.36.1:5000/port/8', '1', sub {
+                            say "Port 8 am NPM aktiviert!";
+                            undef $post;
+                            $epost = http_post 'http://172.22.36.1:5000/port/3', '1', sub {
+                                say "Port 3 am NPM aktiviert!";
+                                undef $epost;
+                            };
+                        };
+
+                        $conn->send_chan($channel, 'PRIVMSG', ($channel,
+                            "$pizza_timer_user: *beep* *beep* Dein Timer \"$pizza_timer_subject\" ist abgelaufen."));
+
+                        $pizza_disable_timer = AnyEvent->timer(after => 5, cb => sub {
+                            my $post;
+                            my $epost;
+                            $post = http_post 'http://172.22.36.1:5000/port/8', '0', sub {
+                                say "Port 8 am NPM deaktiviert!";
+                                undef $post;
+                                $epost = http_post 'http://172.22.36.1:5000/port/3', '0', sub {
+                                    say "Port 3 am NPM deaktiviert!";
+                                    undef $epost;
+                                };
+                            };
+                        });
+
+                        undef $pizza_timer;
+
+                        syslog('info', '!timer executed');
+                    });
                 }
             });
 
