@@ -12,17 +12,17 @@ use feature qw(say);
 use Getopt::Long;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
-use RaumZeitLabor::IRC::MPD;
+use RaumZeitLabor::IRC::Chef;
 
 GetOptions(
     'version' => sub {
-        say "ircbot-mpd v$RaumZeitLabor::IRC::MPD::VERSION";
+        say "ircbot-chef v$RaumZeitLabor::IRC::Chef::VERSION";
         exit 0;
     },
     'help' => sub {
-        say "ircbot-mpd: no options, started via initscript.";
+        say "ircbot-chef: no options, started via initscript.";
         exit 0;
     }
 );
 
-RaumZeitLabor::IRC::MPD->run();
+RaumZeitLabor::IRC::Chef->run();

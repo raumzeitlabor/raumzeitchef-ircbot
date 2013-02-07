@@ -5,17 +5,17 @@ This git repository contains the source for the RaumZeitMPD IRC bot. It
 consists of two files:
 
 <dl>
-  <dt>script/ircbot-mpd</dt>
+  <dt>script/ircbot-chef</dt>
   <dd>A simple script to run the IRC bot, providing --version.</dd>
 
-  <dt>lib/RaumZeitLabor/IRC/MPD.pm</dt>
+  <dt>lib/RaumZeitLabor/IRC/Chef.pm</dt>
   <dd>The bot source code.</dd>
 </dl>
 
 Development
 -----------
-To run the bot on your local machine, use `./script/ircbot-mpd`. Note
-that you need to edit **lib/RaumZeitLabor/IRC/MPD.pm** as it is hard-coded for
+To run the bot on your local machine, use `./script/ircbot-chef`. Note
+that you need to edit **lib/RaumZeitLabor/IRC/Chef.pm** as it is hard-coded for
 the RaumZeitLabor environment.
 
 Building a Debian package

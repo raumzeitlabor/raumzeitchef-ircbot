@@ -5,7 +5,7 @@ use warnings;
 use inc::Module::Install;
 
 name     'RaumZeitMPD';
-all_from 'lib/RaumZeitLabor/IRC/MPD.pm';
+all_from 'lib/RaumZeitLabor/IRC/Chef.pm';
 
 requires 'AnyEvent';
 requires 'AnyEvent::HTTP';
@@ -13,7 +13,7 @@ requires 'AnyEvent::IRC';
 requires 'Audio::MPD';
 requires 'JSON::XS';
 
-install_script 'ircbot-mpd';
+install_script 'ircbot-chef';
 
 postamble <<'END_OF_MAKEFILE';
 install:: extra_install
@@ -22,7 +22,7 @@ install_vendor:: extra_install
 
 extra_install:
 	install -d $(DESTDIR)/etc/rsyslog.d/
-	install -m 644 ircbot-mpd.rsyslog $(DESTDIR)/etc/rsyslog.d/ircbot-mpd.conf
+	install -m 644 ircbot-chef.rsyslog $(DESTDIR)/etc/rsyslog.d/ircbot-chef.conf
 END_OF_MAKEFILE
 
 WriteAll;

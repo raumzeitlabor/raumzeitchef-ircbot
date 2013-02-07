@@ -1,4 +1,4 @@
-package RaumZeitLabor::IRC::MPD;
+package RaumZeitLabor::IRC::Chef;
 # vim:ts=4:sw=4:expandtab
 # © 2010-2012 Michael Stapelberg (see also: LICENSE)
 
@@ -88,7 +88,7 @@ sub run {
     my $pizza_timer = undef;
     my $pizza_disable_timer = undef; # timer used for disabling ping+
 
-    openlog('ircbot-mpd', 'pid', 'daemon');
+    openlog('ircbot-chef', 'pid', 'daemon');
     syslog('info', 'Starting up');
 
     while (1) {
@@ -97,6 +97,7 @@ sub run {
         my $c = AnyEvent->condvar;
         my $conn = AnyEvent::IRC::Client->new;
         my $httpd = AnyEvent::HTTPD->new(host => '127.0.0.1', port => 9091);
+        my @answers = ("Alles klar.", "Yup.", "Okidoki.", "Eyup.", "Roger.");
 
         $httpd->reg_cb(
             '/to_irc' => sub {
@@ -242,7 +243,6 @@ sub run {
                         $conn->send_chan($channel, 'PRIVMSG', ($channel, "Reminder für $reminder_target: $reminder_subject ($time Uhr)"));
                         undef $reminder;
                     });
-                    @answers = ("Alles klar.", "Yup.", "Okidoki.", "Eyup.", "Roger");
                     $conn->send_chan($channel, 'PRIVMSG', ($channel, $answers[rand @answers]));
                 }
 
@@ -293,7 +293,6 @@ sub run {
                         return;
                     }
 
-                    @answers = ("Alles klar.", "Yup.", "Okidoki.", "Eyup.", "Roger");
                     $conn->send_chan($channel, 'PRIVMSG', ($channel, $answers[rand @answers]));
 
                     my ($post, $epost);

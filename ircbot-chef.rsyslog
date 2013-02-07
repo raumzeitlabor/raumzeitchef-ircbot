@@ -1,0 +1,4 @@
+# Log all lines from ircbot-chef to /var/log/ircbot-chef.log (without syncing)
+# and discard them.
+:programname, isequal, "ircbot-chef"  -/var/log/ircbot-chef.log
+:programname, isequal, "ircbot-chef" ~
