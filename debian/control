@@ -1,4 +1,4 @@
-Source: raumzeitmpd-ircbot
+Source: raumzeitchef-ircbot
 Section: perl
 Priority: optional
 Maintainer: Michael Stapelberg <michael@stapelberg.de>
@@ -14,7 +14,7 @@ Build-Depends-Indep: libanyevent-http-perl,
 Standards-Version: 3.9.2
 Homepage: http://search.cpan.org/dist/RaumZeitMPD/
 
-Package: raumzeitmpd-ircbot
+Package: raumzeitchef-ircbot
 Architecture: all
 Depends: ${misc:Depends}, ${perl:Depends},
  libanyevent-http-perl,
