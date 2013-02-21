@@ -141,6 +141,19 @@ sub run {
                 # another 30 seconds, the connection will be closed and a reconnect
                 # will be triggered.
                 $conn->enable_ping(30);
+
+                # if nick differs from one we set on connect (due to a
+                # nick-collision), we try to rename every once in a while.
+                my $nc_timer;
+                $nc_timer = AnyEvent->timer(interval => 30, cb => sub {
+                    if ($conn->nick() ne $nick) {
+                        syslog('info', 'trying to get back my nick...');
+                        $conn->send_srv('NICK', $nick);
+                    } else {
+                        syslog('info', 'got my nick back.');
+                        $nc_timer = undef;
+                    }
+                });
             });
 
         $conn->reg_cb(disconnect => sub { $c->send });
@@ -340,7 +353,7 @@ sub run {
                 }
             });
 
-        $conn->connect($server, $port, { nick => $nick, user => 'mpd' });
+        $conn->connect($server, $port, { nick => $nick, user => 'RaumZeitChef' });
         $c->recv;
 
         # Wait 5 seconds before reconnecting, else we might get banned
