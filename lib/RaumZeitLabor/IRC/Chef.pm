@@ -331,7 +331,7 @@ sub run {
                         };
 
                         $conn->send_chan($channel, 'PRIVMSG', ($channel,
-                            "*beep* *beep* $pizza_timer_user, dein Timer \"$pizza_timer_subject\" ist abgelaufen."));
+                            "( ・∀・)っ♨ $pizza_timer_user, deine Pizza ist fertig."));
 
                         $pizza_disable_timer = AnyEvent->timer(after => 5, cb => sub {
                             my $post;
