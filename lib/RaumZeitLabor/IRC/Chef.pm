@@ -15,6 +15,7 @@ use AnyEvent::HTTPD;
 use AnyEvent::IRC::Client;
 use Audio::MPD;
 use JSON::XS;
+use HTTP::Request::Common ();
 
 our $VERSION = '1.6';
 
@@ -68,6 +69,20 @@ sub mpd_current_song {
         $name = $song->name;
     }
     return "Playing: $name (" . $song->file . " " . $time . ")";
+}
+
+sub http_post_formdata {
+    my ($uri, $content, $cb) = @_;
+
+    my $p = HTTP::Request::Common::POST(
+        $uri,
+        Content_Type => 'form-data',
+        Content => $content
+    );
+
+    my %hdr = map { ($_, $p->header($_)) } $p->header_field_names;
+
+    http_post $p->uri, $p->content, headers => \%hdr, $cb;
 }
 
 sub run {
@@ -180,8 +195,6 @@ sub run {
                 #}
 
                 if ($text =~ /^!ping/) {
-                    $conn->send_chan($channel, 'PRIVMSG', ($channel, "Der Ping+ ist momentan nicht verfügbar."));
-                    return;
 
                     if ((time() - $last_ping) < $ping_freq) {
                         syslog('info', '!ping ignored');
@@ -197,15 +210,16 @@ sub run {
                         if (defined($remaining)) {
                             my $user = $ircmsg->{prefix};
                             my $nick = AnyEvent::IRC::Util::prefix_nick($user);
+                            my $msg = strftime("%H:%M", localtime(time()))
+                                . " <$nick> $remaining";
 
-                            my $body = encode_json({
-                                text => $remaining,
-                                from => $nick,
-                                time => strftime("%H:%M", localtime(time())),
-                            });
-                            my $guard;
-                            $guard = http_post 'http://blackbox.raumzeitlabor.de/pingplus/', $body, sub {
-                                undef $guard;
+                            http_post_formdata 'http://pingiepie.rzl/create/text', [ text => $msg ], sub {
+                                my ($body, $hdr) = @_;
+                                return unless $body;
+
+                                http_post_formdata 'http://pingiepie.rzl/show/scroll', [ id => $body ], sub {};
+
+                                return;
                             };
                         }
 
