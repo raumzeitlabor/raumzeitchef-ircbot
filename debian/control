@@ -10,6 +10,7 @@ Build-Depends-Indep: libanyevent-http-perl,
  libaudio-mpd-perl,
  libjson-xs-perl,
  liburi-perl,
+ libhttp-message-perl,
  perl
 Standards-Version: 3.9.2
 Homepage: http://search.cpan.org/dist/RaumZeitMPD/
@@ -24,6 +25,7 @@ Depends: ${misc:Depends}, ${perl:Depends},
  libaudio-mpd-perl,
  libjson-xs-perl,
  liburi-perl,
+ libhttp-message-perl,
  perl
 Description: RaumZeitMPD IRC bot
  RaumZeitMPD is an IRC bot (nickname RaumZeitMPD) which displays the currently

@@ -12,6 +12,7 @@ requires 'AnyEvent::HTTP';
 requires 'AnyEvent::IRC';
 requires 'Audio::MPD';
 requires 'JSON::XS';
+requires 'HTTP::Message';
 
 install_script 'ircbot-chef';
 
