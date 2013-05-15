@@ -1,6 +1,7 @@
 package RaumZeitLabor::IRC::Chef::Commands::Erinner;
 use strict; use warnings;
 use v5.10;
+use utf8;
 
 # core modules
 use Sys::Syslog;
@@ -34,10 +35,11 @@ RaumZeitLabor::IRC::Chef::Commands->add_command(erinner => sub {
     my $time = strftime("%H:%M", localtime(time()));
     my $reminder;
     $reminder = AnyEvent->timer(after => $reminder_timeout, cb => sub {
-        $conn->send_chan($channel, 'PRIVMSG', ($channel, "Reminder für $reminder_target: $reminder_subject ($time Uhr)"));
+        $conn->say($channel, "Reminder für $reminder_target: $reminder_subject ($time Uhr)");
+
         undef $reminder;
     });
-    $conn->send_chan($channel, 'PRIVMSG', ($channel, $answers[rand @answers]));
+    $conn->say($channel, $answers[rand @answers]);
 
 });
 
@@ -49,29 +51,28 @@ sub timer {
 
     if ($cmd eq 'timer' and $rest eq 'cancel') {
         if (!$pizza_timer) {
-            $conn->send_chan($channel, 'PRIVMSG', ($channel, "Es läuft momentan kein Timer."));
+            $conn->say($channel, "Es läuft momentan kein Timer.");
             return;
         }
 
         my $msguser = AnyEvent::IRC::Util::prefix_nick($ircmsg->{prefix});
         if ($pizza_timer_user eq $msguser) {
             undef $pizza_timer;
-            $conn->send_chan($channel, 'PRIVMSG', ($channel,
-                    "Dein Timer \"$pizza_timer_subject\", $pizza_timer_minutes Minuten "
-                    ."wurde deaktiviert."));
+            $conn->say($channel,
+                "Dein Timer \"$pizza_timer_subject\", $pizza_timer_minutes Minuten wurde deaktiviert.");
             return;
         }
 
-        $conn->send_chan($channel, 'PRIVMSG', ($channel,
-                "Der Timer \"$pizza_timer_subject\", $pizza_timer_minutes Minuten "
-                ."kann nur von $pizza_timer_user deaktiviert werden."));
+        $conn->say($channel,
+            "Der Timer \"$pizza_timer_subject\", $pizza_timer_minutes Minuten "
+            . "kann nur von $pizza_timer_user deaktiviert werden.");
         return;
     }
 
     if ($pizza_timer) {
-        $conn->send_chan($channel, 'PRIVMSG', ($channel,
+        $conn->say($channel,
                 "Es läuft bereits ein Timer von $pizza_timer_user "
-                ."(\"$pizza_timer_subject\", $pizza_timer_minutes Minuten)."));
+                ."(\"$pizza_timer_subject\", $pizza_timer_minutes Minuten).");
         return;
     }
 
@@ -92,12 +93,11 @@ sub timer {
     #     return;
     # }
 
-    $conn->send_chan($channel, 'PRIVMSG', ($channel, $answers[rand @answers]));
+    $conn->say($channel, $answers[rand @answers]);
 
     my ($post, $epost);
     $pizza_timer = AnyEvent->timer(after => $pizza_timer_minutes * 60, cb => sub {
-        $conn->send_chan($channel, 'PRIVMSG', ($channel,
-            "( ・∀・)っ♨ $pizza_timer_user, deine Pizza ist fertig."));
+        $conn->say($channel, "( ・∀・)っ♨ $pizza_timer_user, deine Pizza ist fertig.");
 
         $pizza_disable_timer = AnyEvent->timer(after => 5, cb => sub {
             my $post;

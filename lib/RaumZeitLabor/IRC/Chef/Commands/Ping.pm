@@ -1,6 +1,7 @@
 package RaumZeitLabor::IRC::Chef::Commands::Ping;
 use strict; use warnings;
 use v5.10;
+use utf8;
 
 # core modules
 use Sys::Syslog;
@@ -22,7 +23,7 @@ RaumZeitLabor::IRC::Chef::Commands->add_command(ping => sub {
     if ((time() - $last_ping) < $ping_freq) {
         syslog('info', '!ping ignored');
         if (!$said_idiot) {
-            $conn->send_chan($channel, 'PRIVMSG', ($channel, "Hey! Nur einmal alle 3 Minuten!"));
+            $conn->say($channel, "Hey! Nur einmal alle 3 Minuten!");
             $said_idiot = 1;
         }
 
@@ -61,7 +62,7 @@ RaumZeitLabor::IRC::Chef::Commands->add_command(ping => sub {
             undef $epost;
         };
     };
-    $conn->send_chan($channel, 'PRIVMSG', ($channel, "Die Rundumleuchte wurde für 5 Sekunden aktiviert"));
+    $conn->say($channel, "Die Rundumleuchte wurde für 5 Sekunden aktiviert");
     $disable_timer = AnyEvent->timer(after => 5, cb => sub {
         my $post;
         my $epost;

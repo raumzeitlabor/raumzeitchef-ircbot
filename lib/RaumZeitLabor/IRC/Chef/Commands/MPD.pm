@@ -1,6 +1,7 @@
 package RaumZeitLabor::IRC::Chef::Commands::MPD;
 use strict; use warnings;
 use v5.10;
+use utf8;
 
 # core modules
 use Sys::Syslog;
@@ -12,10 +13,10 @@ RaumZeitLabor::IRC::Chef::Commands->add_command(stream => sub {
     my ($conn, $channel, $ircmsg, $cmd, $rest) = @_;
 
     if ($rest) {
-        $conn->send_chan($channel, 'PRIVMSG', ($channel, "Playing $rest"));
+        $conn->say($channel, $channel, "Playing $rest");
         mpd_change_url($rest);
     } else {
-        $conn->send_chan($channel, 'PRIVMSG', ($channel, mpd_current_song()));
+        $conn->say($channel, mpd_current_song());
     }
 });
 

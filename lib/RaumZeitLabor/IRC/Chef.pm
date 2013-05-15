@@ -5,19 +5,22 @@ package RaumZeitLabor::IRC::Chef;
 use strict;
 use warnings;
 use v5.10;
+use utf8;
+
 # These modules are in core:
 use Sys::Syslog;
 # All these modules are not in core:
 use AnyEvent;
 use AnyEvent::HTTPD;
-use AnyEvent::IRC::Client;
 use JSON::XS;
 
+use parent 'AnyEvent::IRC::Client';
 use RaumZeitLabor::IRC::Chef::Commands qw/MPD Ping Erinner/;
 
 our $VERSION = '1.7';
 
 sub run {
+    my ($class) = @_;
     my $server = "irc.hackint.net";
     my $port = 6667;
     my $nick = "RaumZeitChef";
@@ -30,7 +33,7 @@ sub run {
         syslog('info', "Connecting to $server as $nick...");
         my $old_status = "";
         my $c = AnyEvent->condvar;
-        my $conn = AnyEvent::IRC::Client->new;
+        my $conn = $class->new;
         my $httpd = AnyEvent::HTTPD->new(host => '127.0.0.1', port => 9091);
 
         $httpd->reg_cb(
@@ -46,7 +49,7 @@ sub run {
                 }
 
                 my $decoded = decode_json($req->{'content'});
-                $conn->send_chan($channels[0], 'PRIVMSG', ($channels[0], $decoded->{message}));
+                $conn->say($channels[0], $decoded->{message});
 
                 $req->respond({ content => [
                     'text/html',
@@ -117,6 +120,11 @@ sub run {
         syslog('info', 'Connection lost.');
         sleep 5;
     }
+}
+
+sub say {
+    my ($self, $channel, $msg) = @_;
+    $self->send_long_message('utf8', 0, 'PRIVMSG', $channel, $msg);
 }
 
 1
