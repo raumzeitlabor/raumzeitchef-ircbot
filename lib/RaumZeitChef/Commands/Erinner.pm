@@ -1,4 +1,4 @@
-package RaumZeitLabor::IRC::Chef::Commands::Erinner;
+package RaumZeitChef::Commands::Erinner;
 use strict; use warnings;
 use v5.10;
 use utf8;
@@ -20,7 +20,7 @@ my $pizza_disable_timer = undef; # timer used for disabling ping+
 my @answers = ("Alles klar.", "Yup.", "Okidoki.", "Eyup.", "Roger.");
 
 # timer ohne ping+ (irc-only)
-RaumZeitLabor::IRC::Chef::Commands->add_command(erinner => sub {
+RaumZeitChef::Commands->add_command(erinner => sub {
     my ($conn, $channel, $ircmsg, $cmd, $rest) = @_;
 
     return unless $rest =~ /^(.+) an (.+) in (\d{1,2}) ?(h|m|s)/;
@@ -43,8 +43,8 @@ RaumZeitLabor::IRC::Chef::Commands->add_command(erinner => sub {
 
 });
 
-RaumZeitLabor::IRC::Chef::Commands->add_command(timer => \&timer);
-RaumZeitLabor::IRC::Chef::Commands->add_command(pizza => \&timer);
+RaumZeitChef::Commands->add_command(timer => \&timer);
+RaumZeitChef::Commands->add_command(pizza => \&timer);
 # timer mit ping+ (auf 1 user begrenzt)
 sub timer {
     my ($conn, $channel, $ircmsg, $cmd, $rest) = @_;

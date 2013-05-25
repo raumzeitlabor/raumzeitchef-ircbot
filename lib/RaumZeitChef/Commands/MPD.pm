@@ -1,4 +1,4 @@
-package RaumZeitLabor::IRC::Chef::Commands::MPD;
+package RaumZeitChef::Commands::MPD;
 use strict; use warnings;
 use v5.10;
 use utf8;
@@ -9,7 +9,7 @@ use Sys::Syslog;
 # not in core
 use Audio::MPD;
 
-RaumZeitLabor::IRC::Chef::Commands->add_command(stream => sub {
+RaumZeitChef::Commands->add_command(stream => sub {
     my ($conn, $channel, $ircmsg, $cmd, $rest) = @_;
 
     if ($rest) {

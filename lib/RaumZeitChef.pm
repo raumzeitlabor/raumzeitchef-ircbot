@@ -1,4 +1,4 @@
-package RaumZeitLabor::IRC::Chef;
+package RaumZeitChef;
 # vim:ts=4:sw=4:expandtab
 # © 2010-2012 Michael Stapelberg (see also: LICENSE)
 
@@ -15,7 +15,7 @@ use AnyEvent::HTTPD;
 use JSON::XS;
 
 use parent 'AnyEvent::IRC::Client';
-use RaumZeitLabor::IRC::Chef::Commands qw/MPD Ping Erinner/;
+use RaumZeitChef::Commands qw/MPD Ping Erinner/;
 
 our $VERSION = '1.7';
 
@@ -95,7 +95,7 @@ sub run {
 
         $conn->reg_cb(disconnect => sub { $c->send });
 
-        my %command_whitelist = RaumZeitLabor::IRC::Chef::Commands->commands;
+        my %command_whitelist = RaumZeitChef::Commands->commands;
         $conn->reg_cb(publicmsg => sub {
                 my ($conn, $channel, $ircmsg) = @_;
                 my $text = $ircmsg->{params}->[1];

@@ -1,4 +1,4 @@
-package RaumZeitLabor::IRC::Chef::Commands::Ping;
+package RaumZeitChef::Commands::Ping;
 use strict; use warnings;
 use v5.10;
 use utf8;
@@ -17,7 +17,7 @@ my $said_idiot = 0;
 my $disable_timer = undef;
 my $disable_bell = undef;
 
-RaumZeitLabor::IRC::Chef::Commands->add_command(ping => sub {
+RaumZeitChef::Commands->add_command(ping => sub {
     my ($conn, $channel, $ircmsg, $cmd, $rest) = @_;
 
     if ((time() - $last_ping) < $ping_freq) {

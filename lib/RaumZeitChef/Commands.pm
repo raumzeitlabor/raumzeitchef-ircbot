@@ -1,4 +1,4 @@
-package RaumZeitLabor::IRC::Chef::Commands;
+package RaumZeitChef::Commands;
 use strict; use warnings;
 use v5.10;
 
