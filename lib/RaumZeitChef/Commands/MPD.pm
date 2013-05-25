@@ -1,5 +1,6 @@
 package RaumZeitChef::Commands::MPD;
-use strict; use warnings;
+use RaumZeitChef::Moose;
+use Method::Signatures::Simple;
 use v5.10;
 use utf8;
 
@@ -9,16 +10,14 @@ use Sys::Syslog;
 # not in core
 use Audio::MPD;
 
-RaumZeitChef::Commands->add_command(stream => sub {
-    my ($conn, $channel, $ircmsg, $cmd, $rest) = @_;
-
+command stream => method ($irc, $channel, $ircmsg, $cmd, $rest) {
     if ($rest) {
-        $conn->say($channel, $channel, "Playing $rest");
+        $self->say("Playing $rest");
         mpd_change_url($rest);
     } else {
-        $conn->say($channel, mpd_current_song());
+        $self->say(mpd_current_song());
     }
-});
+};
 
 sub mpd_play_existing_song {
     my ($mpd, $playlist, $url) = @_;

@@ -12,15 +12,5 @@ sub import {
     }
 }
 
-my %whitelist;
-sub add_command {
-    my ($class, $cmd, $cb) = @_;
-    $whitelist{$cmd} = $cb;
-}
-
-sub commands {
-    return %whitelist;
-}
-
 1;
 # vim: set ts=4 sw=4 sts=4 expandtab: 

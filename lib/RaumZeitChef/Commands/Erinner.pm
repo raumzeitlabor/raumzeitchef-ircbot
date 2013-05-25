@@ -1,5 +1,5 @@
 package RaumZeitChef::Commands::Erinner;
-use strict; use warnings;
+use RaumZeitChef::Moose;
 use v5.10;
 use utf8;
 
@@ -9,6 +9,7 @@ use POSIX qw(strftime);
 
 # not in core
 use AnyEvent::HTTP;
+use Method::Signatures::Simple;
 
 # pizza timer
 my $pizza_timer_user;
@@ -20,10 +21,9 @@ my $pizza_disable_timer = undef; # timer used for disabling ping+
 my @answers = ("Alles klar.", "Yup.", "Okidoki.", "Eyup.", "Roger.");
 
 # timer ohne ping+ (irc-only)
-RaumZeitChef::Commands->add_command(erinner => sub {
-    my ($conn, $channel, $ircmsg, $cmd, $rest) = @_;
-
+command erinner => method ($conn, $channel, $ircmsg, $cmd, $rest) {
     return unless $rest =~ /^(.+) an (.+) in (\d{1,2}) ?(h|m|s)/;
+
     my $reminder_target = $1;
     if ($reminder_target eq 'mich') {
         $reminder_target = AnyEvent::IRC::Util::prefix_nick($ircmsg->{prefix});
@@ -35,42 +35,40 @@ RaumZeitChef::Commands->add_command(erinner => sub {
     my $time = strftime("%H:%M", localtime(time()));
     my $reminder;
     $reminder = AnyEvent->timer(after => $reminder_timeout, cb => sub {
-        $conn->say($channel, "Reminder für $reminder_target: $reminder_subject ($time Uhr)");
+        $self->say("Reminder für $reminder_target: $reminder_subject ($time Uhr)");
 
         undef $reminder;
     });
-    $conn->say($channel, $answers[rand @answers]);
+    $self->say($answers[rand @answers]);
 
-});
+};
 
-RaumZeitChef::Commands->add_command(timer => \&timer);
-RaumZeitChef::Commands->add_command(pizza => \&timer);
+command timer => \&timer;
+command pizza => \&timer;
 # timer mit ping+ (auf 1 user begrenzt)
-sub timer {
-    my ($conn, $channel, $ircmsg, $cmd, $rest) = @_;
-
+method timer ($conn, $channel, $ircmsg, $cmd, $rest) {
     if ($cmd eq 'timer' and $rest eq 'cancel') {
         if (!$pizza_timer) {
-            $conn->say($channel, "Es läuft momentan kein Timer.");
+            $self->say("Es läuft momentan kein Timer.");
             return;
         }
 
         my $msguser = AnyEvent::IRC::Util::prefix_nick($ircmsg->{prefix});
         if ($pizza_timer_user eq $msguser) {
             undef $pizza_timer;
-            $conn->say($channel,
+            $self->say(
                 "Dein Timer \"$pizza_timer_subject\", $pizza_timer_minutes Minuten wurde deaktiviert.");
             return;
         }
 
-        $conn->say($channel,
+        $self->say(
             "Der Timer \"$pizza_timer_subject\", $pizza_timer_minutes Minuten "
             . "kann nur von $pizza_timer_user deaktiviert werden.");
         return;
     }
 
     if ($pizza_timer) {
-        $conn->say($channel,
+        $self->say(
                 "Es läuft bereits ein Timer von $pizza_timer_user "
                 ."(\"$pizza_timer_subject\", $pizza_timer_minutes Minuten).");
         return;
@@ -93,11 +91,11 @@ sub timer {
     #     return;
     # }
 
-    $conn->say($channel, $answers[rand @answers]);
+    $self->say($answers[rand @answers]);
 
     my ($post, $epost);
     $pizza_timer = AnyEvent->timer(after => $pizza_timer_minutes * 60, cb => sub {
-        $conn->say($channel, "( ・∀・)っ♨ $pizza_timer_user, deine Pizza ist fertig.");
+        $self->say("( ・∀・)っ♨ $pizza_timer_user, deine Pizza ist fertig.");
 
         $pizza_disable_timer = AnyEvent->timer(after => 5, cb => sub {
             my $post;

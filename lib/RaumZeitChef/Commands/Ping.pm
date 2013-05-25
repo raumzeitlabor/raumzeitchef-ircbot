@@ -1,6 +1,6 @@
 package RaumZeitChef::Commands::Ping;
-use strict; use warnings;
-use v5.10;
+use RaumZeitChef::Moose;
+use v5.14;
 use utf8;
 
 # core modules
@@ -10,6 +10,7 @@ use POSIX qw(strftime);
 # not in core
 use AnyEvent::HTTP;
 use HTTP::Request::Common ();
+use Method::Signatures::Simple;
 
 my $ping_freq = 180; # in seconds
 my $last_ping = 0;
@@ -17,13 +18,12 @@ my $said_idiot = 0;
 my $disable_timer = undef;
 my $disable_bell = undef;
 
-RaumZeitChef::Commands->add_command(ping => sub {
-    my ($conn, $channel, $ircmsg, $cmd, $rest) = @_;
+command ping => method ($irc, $channel, $ircmsg, $cmd, $rest) {
 
     if ((time() - $last_ping) < $ping_freq) {
         syslog('info', '!ping ignored');
         if (!$said_idiot) {
-            $conn->say($channel, "Hey! Nur einmal alle 3 Minuten!");
+            $self->say("Hey! Nur einmal alle 3 Minuten!");
             $said_idiot = 1;
         }
 
@@ -62,7 +62,7 @@ RaumZeitChef::Commands->add_command(ping => sub {
             undef $epost;
         };
     };
-    $conn->say($channel, "Die Rundumleuchte wurde für 5 Sekunden aktiviert");
+    $self->say("Die Rundumleuchte wurde für 5 Sekunden aktiviert");
     $disable_timer = AnyEvent->timer(after => 5, cb => sub {
         my $post;
         my $epost;
@@ -77,7 +77,7 @@ RaumZeitChef::Commands->add_command(ping => sub {
     });
     syslog('info', '!ping executed');
 
-});
+};
 
 sub http_post_formdata {
     my ($uri, $content, $cb) = @_;
