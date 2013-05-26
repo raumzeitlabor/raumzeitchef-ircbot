@@ -1,5 +1,5 @@
 package RaumZeitChef::Commands::Ping;
-use RaumZeitChef::Moose;
+use RaumZeitChef::Role;
 use v5.14;
 use utf8;
 
@@ -19,7 +19,6 @@ my $disable_timer = undef;
 my $disable_bell = undef;
 
 command ping => method ($irc, $channel, $ircmsg, $cmd, $rest) {
-
     if ((time() - $last_ping) < $ping_freq) {
         syslog('info', '!ping ignored');
         if (!$said_idiot) {

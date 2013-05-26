@@ -1,6 +1,6 @@
-package RaumZeitChef::Moose;
+package RaumZeitChef::Role;
 use v5.12;
-use Moose ();
+use Moose::Role ();
 use Moose::Exporter;
 use Method::Signatures::Simple;
 
@@ -36,7 +36,7 @@ method RaumZeitChef::get_commands {
 
 Moose::Exporter->setup_import_methods(
     as_is => ['event', 'command'],
-    also => 'Moose',
+    also => 'Moose::Role',
 );
 
 1;

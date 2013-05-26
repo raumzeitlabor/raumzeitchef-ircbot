@@ -1,6 +1,6 @@
 package RaumZeitChef::Commands::Erinner;
-use RaumZeitChef::Moose;
-use v5.10;
+use RaumZeitChef::Role;
+use v5.14;
 use utf8;
 
 # core modules
@@ -116,7 +116,6 @@ method timer ($conn, $channel, $ircmsg, $cmd, $rest) {
     });
 
 }
-
 
 1;
 # vim: set ts=4 sw=4 sts=4 expandtab: 

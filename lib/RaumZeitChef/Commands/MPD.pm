@@ -1,6 +1,5 @@
 package RaumZeitChef::Commands::MPD;
-use RaumZeitChef::Moose;
-use Method::Signatures::Simple;
+use RaumZeitChef::Role;
 use v5.10;
 use utf8;
 
@@ -9,17 +8,18 @@ use Sys::Syslog;
 
 # not in core
 use Audio::MPD;
+use Method::Signatures::Simple;
 
 command stream => method ($irc, $channel, $ircmsg, $cmd, $rest) {
     if ($rest) {
         $self->say("Playing $rest");
-        mpd_change_url($rest);
+        _mpd_change_url($rest);
     } else {
-        $self->say(mpd_current_song());
+        $self->say(_mpd_current_song());
     }
 };
 
-sub mpd_play_existing_song {
+sub _mpd_play_existing_song {
     my ($mpd, $playlist, $url) = @_;
     # Search for the song
     my @items = $playlist->as_items;
@@ -32,24 +32,24 @@ sub mpd_play_existing_song {
     return 0;
 }
 
-sub mpd_change_url {
+sub _mpd_change_url {
     my $url = shift;
     my $mpd = Audio::MPD->new({ host => 'mpd.rzl' });
     syslog('info', 'Connected to mpd.rzl.');
 
     my $playlist = $mpd->playlist;
 
-    if (!mpd_play_existing_song($mpd, $playlist, $url)) {
+    if (!_mpd_play_existing_song($mpd, $playlist, $url)) {
         syslog('info', "Adding $url to playlist");
         $playlist->add($url);
         $playlist = $mpd->playlist;
-        if (!mpd_play_existing_song($mpd, $playlist, $url)) {
+        if (!_mpd_play_existing_song($mpd, $playlist, $url)) {
             syslog('info', "$url was not added?!");
         }
     }
 }
 
-sub mpd_current_song {
+sub _mpd_current_song {
     my $mpd = Audio::MPD->new({ host => 'mpd.rzl' });
     syslog('info', 'Connected to mpd.rzl.');
 
