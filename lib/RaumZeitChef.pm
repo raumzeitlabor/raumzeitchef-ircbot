@@ -17,10 +17,10 @@ has port => (is => 'ro', default => 6667);
 has nick => (is => 'ro', default => 'RaumZeitChef');
 has channel => (is => 'ro', default => '#raumzeitlabor');
 
-my @plugins = qw/IRC HTTPD Commands::MPD Commands::Ping Commands::Erinner/;
-with(__PACKAGE__ . "::$_") for @plugins;
-
 has cv => (is => 'rw', default => sub { AE::cv });
+
+my @plugins = qw/IRC HTTPD MPD Ping Erinner/;
+with(__PACKAGE__ . "::$_") for @plugins;
 
 sub run {
     my ($class) = @_;
