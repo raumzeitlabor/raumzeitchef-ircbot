@@ -8,8 +8,6 @@ use utf8;
 use Sys::Syslog;
 # All these modules are not in core:
 use AnyEvent;
-use AnyEvent::HTTPD;
-use JSON::XS;
 use Method::Signatures::Simple;
 
 use Moose;
@@ -19,31 +17,10 @@ has port => (is => 'ro', default => 6667);
 has nick => (is => 'ro', default => 'RaumZeitChef');
 has channel => (is => 'ro', default => '#raumzeitlabor');
 
-my @plugins = qw/IRC Commands::MPD Commands::Ping Commands::Erinner/;
+my @plugins = qw/IRC HTTPD Commands::MPD Commands::Ping Commands::Erinner/;
 with(__PACKAGE__ . "::$_") for @plugins;
 
 has cv => (is => 'rw', default => sub { AE::cv });
-
-has httpd => (is => 'ro', default => method {
-    my $httpd = AnyEvent::HTTPD->new(host => '127.0.0.1', port => 9091);
-    $httpd->reg_cb( '/to_irc' => sub {
-        my ($httpd, $req) = @_;
-
-        my $no_content = ['text/plain', 'No content received. Please post JSON'];
-        my $success = ['text/html', '{"success":true}'];
-
-        if (not $req->{content}) {
-            $req->respond({ content => $no_content });
-            return;
-        }
-
-        my $decoded = decode_json($req->{content});
-        $self->say($decoded->{message});
-
-        $req->respond({ content => $success });
-    });
-    return $httpd;
-});
 
 sub run {
     my ($class) = @_;
