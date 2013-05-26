@@ -18,7 +18,8 @@ has irc => (is => 'ro', default => method {
 });
 
 method say ($msg) {
-    $self->irc->send_long_message('utf8', 0, 'PRIVMSG', $self->channel, $msg);
+    my $encoding = utf8::is_utf8($msg) ? undef : 'utf8';
+    $self->irc->send_long_message($encoding, 0, 'PRIVMSG', $self->channel, $msg);
 }
 
 event connect => method ($irc, $err) {
