@@ -23,10 +23,10 @@ my @plugins = qw/IRC HTTPD MPD Ping Erinner/;
 with(__PACKAGE__ . "::$_") for @plugins;
 
 sub run {
-    my ($class) = @_;
-    my $self = $class->new();
+    my ($self) = @_;
     my $nick = $self->nick;
     my $server = $self->server;
+    my $port = $self->port;
 
     openlog('ircbot-chef', 'pid', 'daemon');
     syslog('info', 'Starting up');
@@ -34,7 +34,7 @@ sub run {
     while (1) {
         syslog('info', "Connecting to $server as $nick...");
 
-        $self->irc->connect($self->server, $self->port, { nick => $self->nick, user => 'RaumZeitChef' });
+        $self->irc->connect($server, $port, { nick => $nick, user => $nick });
         $self->cv->recv;
 
         $self->cv(AE::cv);
