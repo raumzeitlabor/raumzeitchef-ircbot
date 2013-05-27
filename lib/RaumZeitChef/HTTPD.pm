@@ -3,6 +3,7 @@ use RaumZeitChef::Role;
 use v5.14;
 use utf8;
 
+use Method::Signatures::Simple;
 use JSON::XS;
 use AnyEvent::HTTPD;
 
