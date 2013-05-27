@@ -4,6 +4,7 @@ use v5.14;
 use utf8;
 use Sys::Syslog;
 use Carp ();
+use Encode qw/decode_utf8/;
 
 use AnyEvent::IRC::Client;
 use Method::Signatures::Simple;
@@ -23,8 +24,7 @@ has irc => (is => 'ro', default => method {
 });
 
 method say ($msg) {
-    my $encoding = utf8::is_utf8($msg) ? undef : 'utf8';
-    $self->irc->send_long_message($encoding, 0, 'PRIVMSG', $self->channel, $msg);
+    $self->irc->send_long_message('utf8', 0, 'PRIVMSG', $self->channel, $msg);
 }
 
 event connect => method ($irc, $err) {
@@ -60,7 +60,8 @@ event registered => method ($irc) {
 event disconnect => method { $self->cv->send };
 
 event publicmsg => method ($irc, $channel, $ircmsg) {
-    my $text = $ircmsg->{params}->[1];
+    # transform raw byte string into an utf8 string
+    my $text = decode_utf8($ircmsg->{params}->[1]);
 
     my %commands = $self->get_commands;
     if (my ($cmd, $rest) = $text =~ /^!(\w+)\s*(.*)\s*$/) {
