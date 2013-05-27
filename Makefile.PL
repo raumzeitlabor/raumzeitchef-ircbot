@@ -4,15 +4,18 @@ use strict;
 use warnings;
 use inc::Module::Install;
 
-name     'RaumZeitMPD';
-all_from 'lib/RaumZeitLabor/IRC/Chef.pm';
+name     'RaumZeitChef';
+all_from 'lib/RaumZeitChef.pm';
 
 requires 'AnyEvent';
 requires 'AnyEvent::HTTP';
 requires 'AnyEvent::IRC';
+requires 'AnyEvent::HTTPD';
 requires 'Audio::MPD';
 requires 'JSON::XS';
 requires 'HTTP::Message';
+requires 'Moose';
+requires 'Method::Signatures::Simple';
 
 install_script 'ircbot-chef';
 
