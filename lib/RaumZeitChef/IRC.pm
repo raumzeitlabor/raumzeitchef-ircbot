@@ -3,12 +3,16 @@ use RaumZeitChef::Role;
 use v5.14;
 use utf8;
 use Sys::Syslog;
+use Carp ();
 
 use AnyEvent::IRC::Client;
 use Method::Signatures::Simple;
 
 has irc => (is => 'ro', default => method {
     my $irc = AnyEvent::IRC::Client->new();
+    $irc->set_exception_cb(func ($e, $event) {
+        Carp::cluck("caught exception in event '$event': $e");
+    });
     my %events = $self->get_events;
     for my $e (keys %events) {
         for my $cb (@{ $events{$e} }) {
