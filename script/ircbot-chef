@@ -12,11 +12,11 @@ use feature qw(say);
 use Getopt::Long;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
-use RaumZeitLabor::IRC::Chef;
+use RaumZeitChef;
 
 GetOptions(
     'version' => sub {
-        say "ircbot-chef v$RaumZeitLabor::IRC::Chef::VERSION";
+        say "ircbot-chef v$RaumZeitChef::VERSION";
         exit 0;
     },
     'help' => sub {
@@ -25,4 +25,4 @@ GetOptions(
     }
 );
 
-RaumZeitLabor::IRC::Chef->run();
+RaumZeitChef->new->run();
