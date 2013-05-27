@@ -2,6 +2,7 @@ package RaumZeitChef::IRC;
 use RaumZeitChef::Role;
 use v5.14;
 use utf8;
+use Sys::Syslog;
 
 use AnyEvent::IRC::Client;
 use Method::Signatures::Simple;
