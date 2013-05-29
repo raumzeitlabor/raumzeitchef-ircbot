@@ -6,6 +6,7 @@ use utf8;
 # core modules
 use Sys::Syslog;
 use POSIX qw(strftime);
+use Encode ();
 
 # not in core
 use AnyEvent::HTTP;
@@ -81,10 +82,14 @@ command ping => method ($irc, $channel, $ircmsg, $cmd, $rest) {
 sub http_post_formdata {
     my ($uri, $content, $cb) = @_;
 
+    for (@$content) {
+        # transform into bytestring
+        $_ = Encode::encode_utf8($_);
+    }
     my $p = HTTP::Request::Common::POST(
         $uri,
         Content_Type => 'form-data',
-        Content => $content
+        Content => $content,
     );
 
     my %hdr = map { ($_, $p->header($_)) } $p->header_field_names;
