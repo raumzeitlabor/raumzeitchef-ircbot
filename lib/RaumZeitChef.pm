@@ -1,6 +1,6 @@
 # vim:ts=4:sw=4:expandtab
 # © 2010-2012 Michael Stapelberg (see also: LICENSE)
-package RaumZeitChef 1.7;
+package RaumZeitChef 1.8;
 use v5.14;
 use utf8;
 
@@ -19,7 +19,7 @@ has channel => (is => 'ro', default => '#raumzeitlabor');
 
 has cv => (is => 'rw', default => sub { AE::cv });
 
-my @plugins = qw/IRC HTTPD MPD Ping Erinner/;
+my @plugins = qw/IRC HTTPD MPD Ping Erinner AutoVoice/;
 with(__PACKAGE__ . "::$_") for @plugins;
 
 sub run {
