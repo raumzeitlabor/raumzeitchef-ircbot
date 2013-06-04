@@ -14,6 +14,7 @@ use HTTP::Request::Common ();
 use Method::Signatures::Simple;
 use Regexp::Common qw/URI/;
 use HTTP::Status qw/status_message/;
+use HTML::Entities qw/decode_entities/;
 
 command urititle => qr#^(?<url>$RE{URI}{HTTP})#, method ($ircmsg, $match) {
     my $data_read = 0;
@@ -25,14 +26,15 @@ command urititle => qr#^(?<url>$RE{URI}{HTTP})#, method ($ircmsg, $match) {
             my ($data, $headers) = @_;
 
             if ($headers->{Status} !~ m/^2/) {
-                $self->say('[Link Info] error: '.status_message($headers->{Status}));
+                $self->say('[Link Info] error: '.$headers->{Status}." ".status_message($headers->{Status}));
                 return 0;
             }
 
             $data_read += length $data; 
             $partial_body .= $data;
             if ($partial_body =~ m#<title>([^<]+)</title>#) {
-                $self->say("[Link Info] $1");
+                my $title = decode_utf8(decode_entities($1));
+                $self->say("[Link Info] $title");
                 return 0;
             }
 

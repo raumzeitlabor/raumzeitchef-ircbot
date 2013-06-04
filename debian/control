@@ -13,6 +13,7 @@ Build-Depends-Indep: libanyevent-http-perl,
  libhttp-message-perl,
  libmoose-perl,
  libmethod-signatures-simple-perl,
+ libhtml-parser-perl,
  perl
 Standards-Version: 3.9.2
 Homepage: http://search.cpan.org/dist/RaumZeitMPD/
@@ -30,6 +31,7 @@ Depends: ${misc:Depends}, ${perl:Depends},
  libhttp-message-perl,
  libmoose-perl,
  libmethod-signatures-simple-perl,
+ libhtml-parser-perl,
  perl
 Description: RaumZeitMPD IRC bot
  RaumZeitMPD is an IRC bot (nickname RaumZeitMPD) which displays the currently

@@ -16,6 +16,7 @@ requires 'JSON::XS';
 requires 'HTTP::Message';
 requires 'Moose';
 requires 'Method::Signatures::Simple';
+requires 'HTML::Parser';
 
 install_script 'ircbot-chef';
 
