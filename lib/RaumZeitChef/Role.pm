@@ -23,9 +23,9 @@ method RaumZeitChef::get_events {
 my %commands;
 func command ($name, $cb) {
     my $rx = qr/^!(?<cmd>\w+)\s*(?<rest>.*)\s*$/;
-    if (ref $cb eq 'Regexp') {
+    if (@_ == 3) {
         $rx = $cb;
-        $cb = pop;
+        $cb = pop @_;
     }
     say "adding command: $name => $cb";
     $commands{$name} = { rx => $rx, cb => $cb };
@@ -35,7 +35,7 @@ func command ($name, $cb) {
 method RaumZeitChef::get_commands {
     return map {
         my $cb = $commands{$_}{cb};
-        ($_ => sub { $self->$cb(@_) })
+        ($_ => { rx => $commands{$_}{rx}, cb => sub { $self->$cb(@_) } })
     } keys %commands;
 }
 
