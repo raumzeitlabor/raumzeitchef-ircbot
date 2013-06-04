@@ -19,7 +19,7 @@ has channel => (is => 'ro', default => '#raumzeitlabor');
 
 has cv => (is => 'rw', default => sub { AE::cv });
 
-my @plugins = qw/IRC HTTPD MPD Ping Erinner AutoVoice/;
+my @plugins = qw/IRC HTTPD MPD Ping Erinner AutoVoice URITitle/;
 with(__PACKAGE__ . "::$_") for @plugins;
 
 sub run {
