@@ -22,7 +22,7 @@ method RaumZeitChef::get_events {
 
 my %commands;
 func command ($name, $cb) {
-    my $rx = qr/^!(?<cmd>\w+)\s*(?<rest>.*)\s*$/;
+    my $rx = qr/^!(?<cmd>$name)\s*(?<rest>.*)\s*$/;
     if (@_ == 3) {
         $rx = $cb;
         $cb = pop @_;
