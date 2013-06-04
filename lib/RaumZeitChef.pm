@@ -12,10 +12,8 @@ use Method::Signatures::Simple;
 
 use Moose;
 
-has server => (is => 'ro', default => 'irc.hackint.net');
-has port => (is => 'ro', default => 6667);
-has nick => (is => 'ro', default => 'RaumZeitChef');
-has channel => (is => 'ro', default => '#raumzeitlabor');
+has $_ => (is => 'ro')
+    for qw/server port nick channel nickserv_pw/;
 
 has cv => (is => 'rw', default => sub { AE::cv });
 

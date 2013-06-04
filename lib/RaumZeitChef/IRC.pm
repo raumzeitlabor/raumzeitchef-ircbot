@@ -9,6 +9,13 @@ use Encode qw/decode_utf8/;
 use AnyEvent::IRC::Client;
 use Method::Signatures::Simple;
 
+requires qw(
+    server port
+    nick channel
+    nickserv_pw
+    cv
+);
+
 has irc => (is => 'ro', default => method {
     my $irc = AnyEvent::IRC::Client->new();
     $irc->set_exception_cb(func ($e, $event) {
@@ -36,8 +43,8 @@ event connect => method ($irc, $err) {
 
 event registered => method ($irc) {
     syslog('info', 'Connected, joining channel');
-    if (my $nickserv = $ENV{RAUMZEITCHEF_NICKSERV}) {
-        $irc->send_srv(PRIVMSG => 'NickServ', $nickserv);
+    if (my $pw = $self->nickserv_pw) {
+        $irc->send_srv(PRIVMSG => 'NickServ', (join ' ', 'identify', $self->nick, $pw));
     }
     $irc->send_srv(JOIN => $self->channel);
 

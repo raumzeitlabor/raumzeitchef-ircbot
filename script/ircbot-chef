@@ -6,13 +6,20 @@
 # song (querying the MPD) upon !stream and enables a light upon !ping.
 #
 
-use strict;
-use warnings;
-use feature qw(say);
+use v5.14;
+use warnings FATAL => 'all';
 use Getopt::Long;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use RaumZeitChef;
+
+my @options = (
+    server => 'irc.hackint.net',
+    port => 6667,
+    nick => 'RaumZeitChef',
+    channel => '#raumzeitlabor',
+    nickserv_pw => delete $ENV{IRCBOT_CHEF_NICKSERV}, # export in /etc/default/ircbot-chef
+);
 
 GetOptions(
     'version' => sub {
@@ -25,4 +32,4 @@ GetOptions(
     }
 );
 
-RaumZeitChef->new->run();
+RaumZeitChef->new(@options)->run();
