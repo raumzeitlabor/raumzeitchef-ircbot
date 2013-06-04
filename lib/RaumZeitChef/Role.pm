@@ -22,14 +22,19 @@ method RaumZeitChef::get_events {
 
 my %commands;
 func command ($name, $cb) {
+    my $rx = qr/^!(?<cmd>\w+)\s*(?<rest>.*)\s*$/;
+    if (ref $cb eq 'Regexp') {
+        $rx = $cb;
+        $cb = pop;
+    }
     say "adding command: $name => $cb";
-    $commands{$name} = $cb;
+    $commands{$name} = { rx => $rx, cb => $cb };
 }
 # wrap each command with $self
 # XXX code smell, injects method
 method RaumZeitChef::get_commands {
     return map {
-        my $cb = $commands{$_};
+        my $cb = $commands{$_}{cb};
         ($_ => sub { $self->$cb(@_) })
     } keys %commands;
 }

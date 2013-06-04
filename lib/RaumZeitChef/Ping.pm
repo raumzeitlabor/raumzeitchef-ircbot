@@ -19,7 +19,9 @@ my $said_idiot = 0;
 my $disable_timer = undef;
 my $disable_bell = undef;
 
-command ping => method ($irc, $channel, $ircmsg, $cmd, $rest) {
+command ping => method ($msg, $match) {
+    my ($cmd, $rest) = ($match->{cmd}, $match->{rest});
+    my $irc = $self->irc;
     if ((time() - $last_ping) < $ping_freq) {
         syslog('info', '!ping ignored');
         if (!$said_idiot) {
@@ -34,7 +36,7 @@ command ping => method ($irc, $channel, $ircmsg, $cmd, $rest) {
     # Remaining text will be sent to Ping+, see:
     # https://raumzeitlabor.de/wiki/Ping+
     if ($rest) {
-        my $user = $ircmsg->{prefix};
+        my $user = $msg->{prefix};
         my $nick = AnyEvent::IRC::Util::prefix_nick($user);
         my $msg = strftime("%H:%M", localtime(time()))
             . " <$nick> $rest";

@@ -74,9 +74,11 @@ event publicmsg => method ($irc, $channel, $ircmsg) {
     my $text = decode_utf8($ircmsg->{params}->[1]);
 
     my %commands = $self->get_commands;
-    if (my ($cmd, $rest) = $text =~ /^!(\w+)\s*(.*)\s*$/) {
-        if (my $cb = $commands{$cmd}) {
-            $cb->($irc, $channel, $ircmsg, $cmd, $rest);
+    for my $cmd_name (keys %commands) {
+        if ($text =~ $commands{$cmd_name}{rx}) {
+            my $cb = $commands{$cmd_name}{cb};
+            my $match = { %+ };
+            $cb->($ircmsg, $match);
         }
     }
 
