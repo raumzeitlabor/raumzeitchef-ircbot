@@ -17,6 +17,7 @@ use HTTP::Status qw/status_message/;
 
 command urititle => qr#^(?<url>$RE{URI}{HTTP})#, method ($irc, $channel, $ircmsg, $match, $rest) {
     my $data_read = 0;
+    my $partial_body;
     http_get $match,
         timeout => 3,
         on_header => sub { $_[0]{"content-type"} =~ /^text\/html\s*(?:;|$)/ },
@@ -29,10 +30,12 @@ command urititle => qr#^(?<url>$RE{URI}{HTTP})#, method ($irc, $channel, $ircmsg
             }
 
             $data_read += length $data; 
-            if ($data =~ m#<title>([^<]+)</title>#) {
+            $partial_body .= $data;
+            if ($partial_body =~ m#<title>([^<]+)</title>#) {
                 $self->say("[Link Info] $1");
                 return 0;
             }
+
             # no title found, continue if < 8kb
             return 1 if ($data_read < 8192);
         }
