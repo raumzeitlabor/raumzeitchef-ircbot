@@ -36,6 +36,9 @@ event connect => method ($irc, $err) {
 
 event registered => method ($irc) {
     syslog('info', 'Connected, joining channel');
+    if (my $nickserv = $ENV{RAUMZEITCHEF_NICKSERV}) {
+        $irc->send_srv(PRIVMSG => 'NickServ', $nickserv);
+    }
     $irc->send_srv(JOIN => $self->channel);
 
     # Send a PING every 30 seconds. If no PONG is received within
