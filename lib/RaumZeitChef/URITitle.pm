@@ -15,10 +15,10 @@ use Method::Signatures::Simple;
 use Regexp::Common qw/URI/;
 use HTTP::Status qw/status_message/;
 
-command urititle => qr#^(?<url>$RE{URI}{HTTP})#, method ($irc, $channel, $ircmsg, $match, $rest) {
+command urititle => qr#^(?<url>$RE{URI}{HTTP})#, method ($ircmsg, $match) {
     my $data_read = 0;
     my $partial_body;
-    http_get $match,
+    http_get $match->{url},
         timeout => 3,
         on_header => sub { $_[0]{"content-type"} =~ /^text\/html\s*(?:;|$)/ },
         on_body => sub {
@@ -38,8 +38,8 @@ command urititle => qr#^(?<url>$RE{URI}{HTTP})#, method ($irc, $channel, $ircmsg
 
             # no title found, continue if < 8kb
             return 1 if ($data_read < 8192);
-        }
-    };
+        };
+
     syslog('info', 'fetching remote content '.$match);
 };
 

@@ -10,7 +10,8 @@ use Sys::Syslog;
 use Audio::MPD;
 use Method::Signatures::Simple;
 
-command stream => method ($irc, $channel, $ircmsg, $cmd, $rest) {
+command stream => method ($msg, $match) {
+    my $rest = $match->{rest};
     if ($rest) {
         $self->say("Playing $rest");
         _mpd_change_url($rest);

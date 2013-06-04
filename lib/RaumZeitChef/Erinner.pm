@@ -21,7 +21,8 @@ my $pizza_disable_timer = undef; # timer used for disabling ping+
 my @answers = ("Alles klar.", "Yup.", "Okidoki.", "Eyup.", "Roger.");
 
 # timer ohne ping+ (irc-only)
-command erinner => method ($conn, $channel, $ircmsg, $cmd, $rest) {
+command erinner => method ($ircmsg, $match) {
+    my ($cmd, $rest) = ($match->{cmd}, $match->{rest});
     return unless $rest =~ /^(.+) an (.+) in (\d{1,2}) ?(h|m|s)/;
 
     my $reminder_target = $1;
@@ -46,7 +47,8 @@ command erinner => method ($conn, $channel, $ircmsg, $cmd, $rest) {
 command timer => \&timer;
 command pizza => \&timer;
 # timer mit ping+ (auf 1 user begrenzt)
-method timer ($conn, $channel, $ircmsg, $cmd, $rest) {
+method timer ($ircmsg, $match) {
+    my ($cmd, $rest) = ($match->{cmd}, $match->{rest});
     if ($cmd eq 'timer' and $rest eq 'cancel') {
         if (!$pizza_timer) {
             $self->say("Es läuft momentan kein Timer.");
