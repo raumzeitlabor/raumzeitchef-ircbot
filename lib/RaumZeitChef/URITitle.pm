@@ -17,7 +17,9 @@ use HTTP::Status qw/status_message/;
 use HTML::Entities qw/decode_entities/;
 use Encode qw/decode_utf8/;
 
-command urititle => qr#^(?<url>$RE{URI}{HTTP})#, method ($ircmsg, $match) {
+# derp.
+(my $re = $RE{URI}{HTTP}) =~ s/http/https?/;
+command urititle => qr#^(?<url>$re)#, method ($ircmsg, $match) {
     my $data_read = 0;
     my $partial_body;
     http_get $match->{url},
@@ -26,7 +28,7 @@ command urititle => qr#^(?<url>$RE{URI}{HTTP})#, method ($ircmsg, $match) {
         on_body => sub {
             my ($data, $headers) = @_;
 
-            if ($headers->{Status} !~ m/^2/) {
+            if ($headers->{Status} !~ m/^2/ && $headers->{Status} !~ m/^59/) {
                 $self->say('[Link Info] error: '.$headers->{Status}." ".status_message($headers->{Status}));
                 return 0;
             }
