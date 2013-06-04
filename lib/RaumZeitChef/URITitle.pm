@@ -15,6 +15,7 @@ use Method::Signatures::Simple;
 use Regexp::Common qw/URI/;
 use HTTP::Status qw/status_message/;
 use HTML::Entities qw/decode_entities/;
+use Encode qw/decode_utf8/;
 
 command urititle => qr#^(?<url>$RE{URI}{HTTP})#, method ($ircmsg, $match) {
     my $data_read = 0;
