@@ -74,7 +74,7 @@ method has_mode ($mode, $nick) {
     my $m = $self->irc->nick_modes($chan, $_);
 
     return unless $m;
-    return $m->{$mode_char} == $want
+    return ($m->{$mode_char} ? 1 : 0) == $want
 }
 
 method list_channel_nicks {
