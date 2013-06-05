@@ -89,7 +89,7 @@ method benutzerdb_to_channel (@members) {
 
     return map {
         my $member = $_;
-        first { _normalize_channick($_) eq lc $member } keys %nicks
+        first { _normalize_channick($_) eq lc $member } @nicks
     } @members
 }
 
