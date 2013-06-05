@@ -1,8 +1,9 @@
 # vim:ts=4:sw=4:expandtab
 # © 2010-2012 Michael Stapelberg (see also: LICENSE)
-package RaumZeitChef 1.8;
 use v5.14;
 use utf8;
+
+package RaumZeitChef 1.8;
 
 # These modules are in core:
 use Sys::Syslog;
@@ -12,13 +13,27 @@ use Method::Signatures::Simple;
 
 use Moose;
 
-has $_ => (is => 'ro')
-    for qw/server port nick channel nickserv_pw/;
+has [qw/server port nick channel nickserv_pw/] =>
+    (is => 'ro', required => 1);
 
 has cv => (is => 'rw', default => sub { AE::cv });
 
-my @plugins = qw/IRC HTTPD MPD Ping Erinner AutoVoice URITitle/;
-with(__PACKAGE__ . "::$_") for @plugins;
+# automatically consume all plugins
+{
+    my @class_prefix = (__PACKAGE__, 'Plugin');
+    my $class_path = join '::', @class_prefix;
+
+    # find files via shell globbing
+    my @files = glob '{' . join(',', @INC) . "}/${class_path}/*.pm";
+    #  transform filenames to RaumZeitChef::Plugin::*
+    my @plugins = map {
+        my ($stem) = m[/ ( [^/]+ ) \.pm $]x;
+        join '::', @class_prefix, $stem;
+    } @files;
+
+    # don't uniq(@plugins); if we have multiple files, die instead
+    with($_) for @plugins;
+}
 
 sub run {
     my ($self) = @_;

@@ -1,4 +1,4 @@
-package RaumZeitChef::MPD;
+package RaumZeitChef::Plugin::MPD;
 use RaumZeitChef::Role;
 use v5.10;
 use utf8;

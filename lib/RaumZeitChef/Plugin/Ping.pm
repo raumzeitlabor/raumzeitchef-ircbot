@@ -1,4 +1,4 @@
-package RaumZeitChef::Ping;
+package RaumZeitChef::Plugin::Ping;
 use RaumZeitChef::Role;
 use v5.14;
 use utf8;

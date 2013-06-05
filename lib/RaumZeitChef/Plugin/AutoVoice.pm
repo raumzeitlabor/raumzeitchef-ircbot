@@ -1,4 +1,4 @@
-package RaumZeitChef::AutoVoice;
+package RaumZeitChef::Plugin::AutoVoice;
 use RaumZeitChef::Role;
 use v5.14;
 use utf8;

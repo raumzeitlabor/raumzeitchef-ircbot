@@ -1,4 +1,4 @@
-package RaumZeitChef::URITitle;
+package RaumZeitChef::Plugin::URITitle;
 use RaumZeitChef::Role;
 use v5.14;
 use utf8;

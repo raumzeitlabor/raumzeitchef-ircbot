@@ -1,4 +1,4 @@
-package RaumZeitChef::Erinner;
+package RaumZeitChef::Plugin::Erinner;
 use RaumZeitChef::Role;
 use v5.14;
 use utf8;
