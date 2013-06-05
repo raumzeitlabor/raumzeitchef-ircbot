@@ -53,9 +53,13 @@ func _normalize_channick($nick) {
 
 method has_mode ($mode, $nick) {
     my $chan = $self->channel;
+    my ($want, $mode_char) = $mode =~ /(.)(.)/;
+    $want = $want eq '+' ? 1 : 0;
+
     my $m = $self->irc->nick_modes($chan, $_);
-    $m and $mode eq '+v' ? $m->{v} :
-           $mode eq '-v' ? not $m->{v} : ()
+
+    return unless $m;
+    return $m->{$mode_char} == $want
 }
 
 # given a benutzerdb-nick it tries to find a matching nick in our channel,
