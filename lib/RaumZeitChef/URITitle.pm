@@ -19,7 +19,7 @@ use Encode qw/decode_utf8/;
 
 # derp.
 (my $re = $RE{URI}{HTTP}) =~ s/http/https?/;
-command urititle => qr#^(?<url>$re)#, method ($ircmsg, $match) {
+command urititle => qr#(?<url>$re)#, method ($ircmsg, $match) {
     my $data_read = 0;
     my $partial_body = '';
     http_get $match->{url},
