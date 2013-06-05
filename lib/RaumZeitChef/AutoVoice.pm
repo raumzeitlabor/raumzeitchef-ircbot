@@ -36,12 +36,27 @@ method _laborant_part (@members) {
     );
 }
 
-event channel_add => method ($irc, $msg, $channel, @nicks) {
-    $self->_laborant_join(
-        grep {
-            $self->has_mode('-v', $_);
-        } $self->benutzerdb_to_channel($self->raumstatus->members)
-    );
+event join => method ($irc, $nick, $channel, $is_myself) {
+    if ($is_myself) {
+        # enter the event loop one more time, since channel_list isn't up to date
+        state $t = AnyEvent->timer(after => 0.5, cb => sub {
+            my @members = $self->benutzerdb_to_channel($self->raumstatus->members);
+            warn "members after join: @members\n";
+
+            $self->set_voice(
+                grep { $self->has_mode('-v', $_) } @members
+            );
+
+            # remove stale +v
+            my @voiced = grep { $self->has_mode('+v', $_) } $self->list_channel_nicks;
+            $self->remove_voice(grep { not $_ ~~ @members } @voiced);
+        };
+    } else {
+        warn "join: $nick\n";
+        return unless _normalize_channick($nick) ~~ $self->raumstatus->members;
+
+        $self->set_voice($nick);
+    }
 };
 
 func _normalize_channick($nick) {
@@ -62,10 +77,15 @@ method has_mode ($mode, $nick) {
     return $m->{$mode_char} == $want
 }
 
+method list_channel_nicks {
+    my %nicks = %{ $self->irc->channel_list($self->channel) || {} };
+    return keys %nicks;
+}
+
 # given a benutzerdb-nick it tries to find a matching nick in our channel,
 # returning the channel nick
 method benutzerdb_to_channel (@members) {
-    my %nicks = %{ $self->irc->channel_list($self->channel) || {} };
+    my @nicks = $self->list_channel_nicks;
 
     return map {
         my $member = $_;
