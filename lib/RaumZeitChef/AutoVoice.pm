@@ -50,7 +50,7 @@ event join => method ($irc, $nick, $channel, $is_myself) {
             # remove stale +v
             my @voiced = grep { $self->has_mode('+v', $_) } $self->list_channel_nicks;
             $self->remove_voice(grep { not $_ ~~ @members } @voiced);
-        };
+        });
     } else {
         warn "join: $nick\n";
         return unless _normalize_channick($nick) ~~ $self->raumstatus->members;
