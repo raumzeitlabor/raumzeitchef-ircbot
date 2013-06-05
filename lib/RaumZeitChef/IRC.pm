@@ -73,7 +73,10 @@ event publicmsg => method ($irc, $channel, $ircmsg) {
     # transform raw byte string into an utf8 string
     my $text = decode_utf8($ircmsg->{params}->[1]);
 
-    my %commands = $self->get_commands;
+    # for now, commands cannot be added at runtime
+    # so it is okay to cache them
+    state %commands ||= $self->get_commands;
+
     for my $cmd_name (keys %commands) {
         if ($text =~ $commands{$cmd_name}{rx}) {
             my $cb = $commands{$cmd_name}{cb};
