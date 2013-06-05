@@ -18,10 +18,13 @@ has [qw/server port nick channel nickserv_pw/] =>
 
 has cv => (is => 'rw', default => sub { AE::cv });
 
+# load base roles
+with("RaumZeitChef::$_") for qw/IRC HTTPD/;
+
 # automatically consume all plugins
 {
     my @class_prefix = (__PACKAGE__, 'Plugin');
-    my $class_path = join '::', @class_prefix;
+    my $class_path = join '/', @class_prefix;
 
     # find files via shell globbing
     my @files = glob '{' . join(',', @INC) . "}/${class_path}/*.pm";
