@@ -9,16 +9,8 @@ func event ($name, $cb) {
     say "adding event: $name => $cb";
     push @{$events{$name} ||= []}, $cb;
 }
-# wrap each event with $self
 # XXX code smell, injects method
-method RaumZeitChef::get_events {
-    return map {
-        $_ => [ map {
-                    my $cb = $_;
-                    sub { $self->$cb(@_) }
-                } @{ $events{$_} } ]
-    } keys %events
-}
+method RaumZeitChef::get_events { %events }
 
 my %commands;
 func command ($name, $cb) {
@@ -30,14 +22,8 @@ func command ($name, $cb) {
     say "adding command: $name => $cb";
     $commands{$name} = { rx => $rx, cb => $cb };
 }
-# wrap each command with $self
 # XXX code smell, injects method
-method RaumZeitChef::get_commands {
-    return map {
-        my $cb = $commands{$_}{cb};
-        ($_ => { rx => $commands{$_}{rx}, cb => sub { $self->$cb(@_) } })
-    } keys %commands;
-}
+method RaumZeitChef::get_commands { %commands }
 
 Moose::Exporter->setup_import_methods(
     as_is => ['event', 'command'],

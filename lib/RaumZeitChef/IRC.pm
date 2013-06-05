@@ -22,9 +22,9 @@ has irc => (is => 'ro', default => method {
         Carp::cluck("caught exception in event '$event': $e");
     });
     my %events = $self->get_events;
-    for my $e (keys %events) {
-        for my $cb (@{ $events{$e} }) {
-            $irc->reg_cb($e => $cb);
+    for my $name (keys %events) {
+        for my $cb (@{ $events{$name} }) {
+            $irc->reg_cb($e => sub { $self->$cb(@_) });
         }
     }
     return $irc;
@@ -81,7 +81,7 @@ event publicmsg => method ($irc, $channel, $ircmsg) {
         if ($text =~ $commands{$cmd_name}{rx}) {
             my $cb = $commands{$cmd_name}{cb};
             my $match = { %+ };
-            $cb->($ircmsg, $match);
+            $self->$cb($ircmsg, $match);
         }
     }
 
