@@ -21,7 +21,7 @@ use Encode qw/decode_utf8/;
 (my $re = $RE{URI}{HTTP}) =~ s/http/https?/;
 command urititle => qr#^(?<url>$re)#, method ($ircmsg, $match) {
     my $data_read = 0;
-    my $partial_body;
+    my $partial_body = '';
     http_get $match->{url},
         timeout => 3,
         on_header => sub { $_[0]{"content-type"} =~ /^text\/html\s*(?:;|$)/ },
@@ -35,10 +35,24 @@ command urititle => qr#^(?<url>$re)#, method ($ircmsg, $match) {
 
             $data_read += length $data; 
             $partial_body .= $data;
-            if ($partial_body =~ m#<title>([^<]+)</title>#) {
-                my $title = decode_utf8(decode_entities($1));
-                $self->say("[Link Info] $title");
-                return 0;
+            if (state $found_title ||= $partial_body =~ m#<title>#igsc) {
+                state $off_start ||= pos $partial_body;
+                if ($partial_body =~ m#</title>#igsc) {
+                    my $len = pos($partial_body) - length('</title>') - $off_start;
+                    say "$off_start $len";
+                    my $too_long = $len > 72;
+                    $len = 72 if $too_long;
+                    my $title = substr $partial_body, $off_start, $len;
+                    for ($title) {
+                        # XXX decode correct encoding
+                        $_ = decode_utf8($_);
+                        $_ = decode_entities($_);
+                        s/\s+/ /sg;
+                    }
+                    $title .= '…' if $too_long;
+                    $self->say("[Link Info] $title");
+                    return 0;
+                }
             }
 
             # no title found, continue if < 8kb
