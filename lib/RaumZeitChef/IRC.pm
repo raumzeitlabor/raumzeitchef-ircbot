@@ -24,7 +24,7 @@ has irc => (is => 'ro', default => method {
     my %events = $self->get_events;
     for my $name (keys %events) {
         for my $cb (@{ $events{$name} }) {
-            $irc->reg_cb($e => sub { $self->$cb(@_) });
+            $irc->reg_cb($name => sub { $self->$cb(@_) });
         }
     }
     return $irc;
@@ -75,7 +75,8 @@ event publicmsg => method ($irc, $channel, $ircmsg) {
 
     # for now, commands cannot be added at runtime
     # so it is okay to cache them
-    state %commands ||= $self->get_commands;
+    state %commands;
+    %commands = $self->get_commands unless keys %commands;
 
     for my $cmd_name (keys %commands) {
         if ($text =~ $commands{$cmd_name}{rx}) {
