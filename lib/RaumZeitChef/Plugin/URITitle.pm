@@ -1,5 +1,5 @@
 package RaumZeitChef::Plugin::URITitle;
-use RaumZeitChef::Role;
+use RaumZeitChef::Plugin;
 use v5.14;
 use utf8;
 
@@ -19,7 +19,7 @@ use Encode qw/decode_utf8/;
 
 # derp.
 (my $re = $RE{URI}{HTTP}) =~ s/http/https?/;
-command urititle => qr#(?<url>$re)#, method ($ircmsg, $match) {
+command 'urititle', match_rx => qr#(?<url>$re)#, method ($ircmsg, $match) {
     my $data_read = 0;
     my $partial_body = '';
     http_get $match->{url},
@@ -39,7 +39,6 @@ command urititle => qr#(?<url>$re)#, method ($ircmsg, $match) {
                 state $off_start ||= pos $partial_body;
                 if ($partial_body =~ m#</title>#igsc) {
                     my $len = pos($partial_body) - length('</title>') - $off_start;
-                    say "$off_start $len";
                     my $too_long = $len > 72;
                     $len = 72 if $too_long;
                     my $title = substr $partial_body, $off_start, $len;

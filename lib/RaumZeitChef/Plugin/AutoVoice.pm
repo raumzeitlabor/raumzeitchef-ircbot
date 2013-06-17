@@ -1,5 +1,5 @@
 package RaumZeitChef::Plugin::AutoVoice;
-use RaumZeitChef::Role;
+use RaumZeitChef::Plugin;
 use v5.14;
 use utf8;
 use Sys::Syslog;
@@ -100,7 +100,7 @@ method set_voice (@nicks) {
     return unless @nicks;
     say "give: @nicks";
 
-    # voice at most 4 nickss
+    # voice at most 4 nicks
     my $iter = natatime 4, @nicks;
     while (my @part = $iter->()) {
         $self->irc->send_msg(join ' ', 'MODE', $self->channel, ('+' . ('v' x @part)), @part);
@@ -111,7 +111,7 @@ method remove_voice (@nicks) {
     return unless @nicks;
     say "remove: @nicks";
 
-    # devoice at most 4 nickss
+    # devoice at most 4 nicks
     my $iter = natatime 4, @nicks;
     while (my @part = $iter->()) {
         $self->irc->send_msg(join ' ', 'MODE', $self->channel, ('-' . ('v' x @part)), @part);
