@@ -13,7 +13,7 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 use RaumZeitChef;
 
-my @options = (
+my %options = (
     server => 'irc.hackint.net',
     port => 6667,
     nick => 'RaumZeitChef',
@@ -22,6 +22,10 @@ my @options = (
 );
 
 GetOptions(
+    'nick=s' => \$options{nick},
+    'channel=s' => \$options{channel},
+    'server=s' => \$options{server},
+    'port=i' => \$options{port},
     'version' => sub {
         say "ircbot-chef v$RaumZeitChef::VERSION";
         exit 0;
@@ -32,4 +36,4 @@ GetOptions(
     }
 );
 
-RaumZeitChef->new(@options)->run();
+RaumZeitChef->new(%options)->run();
