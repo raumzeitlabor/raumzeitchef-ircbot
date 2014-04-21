@@ -3,8 +3,9 @@ use RaumZeitChef::Plugin;
 use v5.14;
 use utf8;
 
+use RaumZeitChef::Log;
+
 # core modules
-use Sys::Syslog;
 use POSIX qw(strftime);
 
 # not in core
@@ -103,10 +104,10 @@ method timer ($ircmsg, $match) {
             my $post;
             my $epost;
             $post = http_post 'http://172.22.36.1:5000/port/8', '0', sub {
-                say "Port 8 am NPM deaktiviert!";
+                log_info("Port 8 am NPM deaktiviert!");
                 undef $post;
                 $epost = http_post 'http://172.22.36.1:5000/port/3', '0', sub {
-                    say "Port 3 am NPM deaktiviert!";
+                    log_info("Port 3 am NPM deaktiviert!");
                     undef $epost;
                 };
             };
@@ -114,7 +115,7 @@ method timer ($ircmsg, $match) {
 
         undef $pizza_timer;
 
-        syslog('info', '!timer executed');
+        log_info('!timer executed');
     });
 
 }

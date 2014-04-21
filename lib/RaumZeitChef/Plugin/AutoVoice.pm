@@ -2,7 +2,8 @@ package RaumZeitChef::Plugin::AutoVoice;
 use RaumZeitChef::Plugin;
 use v5.14;
 use utf8;
-use Sys::Syslog;
+
+use RaumZeitChef::Log;
 
 use Method::Signatures::Simple;
 use RaumZeitLabor::RaumStatus;
@@ -41,7 +42,7 @@ event join => method ($irc, $nick, $channel, $is_myself) {
         # enter the event loop one more time, since channel_list isn't up to date
         state $t = AnyEvent->timer(after => 0.5, cb => sub {
             my @members = $self->benutzerdb_to_channel($self->raumstatus->members);
-            warn "members after join: @members\n";
+            log_debug("members after join: @members");
 
             $self->set_voice(
                 grep { $self->has_mode('-v', $_) } @members
@@ -52,7 +53,7 @@ event join => method ($irc, $nick, $channel, $is_myself) {
             $self->remove_voice(grep { not $_ ~~ \@members } @voiced);
         });
     } else {
-        warn "join: $nick\n";
+        log_debug("join: $nick");
         return unless _normalize_channick($nick) ~~ [ $self->raumstatus->members ];
 
         $self->set_voice($nick);
@@ -98,7 +99,7 @@ method channel_to_benutzerdb ($member) {
 
 method set_voice (@nicks) {
     return unless @nicks;
-    say "give: @nicks";
+    log_debug("give: @nicks");
 
     # voice at most 4 nicks
     my $iter = natatime 4, @nicks;
@@ -109,7 +110,7 @@ method set_voice (@nicks) {
 
 method remove_voice (@nicks) {
     return unless @nicks;
-    say "remove: @nicks";
+    log_debug("remove: @nicks");
 
     # devoice at most 4 nicks
     my $iter = natatime 4, @nicks;

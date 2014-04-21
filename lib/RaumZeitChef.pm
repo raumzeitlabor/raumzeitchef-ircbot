@@ -6,12 +6,13 @@ use utf8;
 package RaumZeitChef 1.8;
 
 # These modules are in core:
-use Sys::Syslog;
 # All these modules are not in core:
 use AnyEvent;
 use Method::Signatures::Simple;
 
 use Moose;
+
+use RaumZeitChef::Log;
 
 has [qw/server port nick channel nickserv_pw/] =>
     (is => 'ro', required => 1);
@@ -44,11 +45,10 @@ sub run {
     my $server = $self->server;
     my $port = $self->port;
 
-    openlog('ircbot-chef', 'pid', 'daemon');
-    syslog('info', 'Starting up');
+    log_info('Starting up');
 
     while (1) {
-        syslog('info', "Connecting to $server as $nick...");
+        log_info("Connecting to $host as $nick...");
 
         $self->irc->connect($server, $port, { nick => $nick, user => $nick });
         $self->cv->recv;
@@ -56,7 +56,7 @@ sub run {
         $self->cv(AE::cv);
 
         # Wait 5 seconds before reconnecting, else we might get banned
-        syslog('info', 'Connection lost.');
+        log_info('Connection lost.');
         sleep 5;
     }
 }

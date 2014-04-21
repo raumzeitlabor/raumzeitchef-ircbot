@@ -3,8 +3,7 @@ use RaumZeitChef::Plugin;
 use v5.10;
 use utf8;
 
-# core modules
-use Sys::Syslog;
+use RaumZeitChef::Log;
 
 # not in core
 use Audio::MPD;
@@ -26,7 +25,7 @@ sub _mpd_play_existing_song {
     my @items = $playlist->as_items;
     for my $item (@items) {
         next if $item->file ne $url;
-        syslog('info', "Found $url (file is " . $item->file . ", id is " . $item->id . "), playing");
+        log_info("Found $url (file is " . $item->file . ", id is " . $item->id . "), playing");
         $mpd->playid($item->id);
         return 1;
     }
@@ -36,23 +35,23 @@ sub _mpd_play_existing_song {
 sub _mpd_change_url {
     my $url = shift;
     my $mpd = Audio::MPD->new({ host => 'mpd.rzl' });
-    syslog('info', 'Connected to mpd.rzl.');
+    log_info('Connected to mpd.rzl.');
 
     my $playlist = $mpd->playlist;
 
     if (!_mpd_play_existing_song($mpd, $playlist, $url)) {
-        syslog('info', "Adding $url to playlist");
+        log_info("Adding $url to playlist");
         $playlist->add($url);
         $playlist = $mpd->playlist;
         if (!_mpd_play_existing_song($mpd, $playlist, $url)) {
-            syslog('info', "$url was not added?!");
+            log_info("$url was not added?!");
         }
     }
 }
 
 sub _mpd_current_song {
     my $mpd = Audio::MPD->new({ host => 'mpd.rzl' });
-    syslog('info', 'Connected to mpd.rzl.');
+    log_info('Connected to mpd.rzl.');
 
     my $song = $mpd->current;
     my $name;

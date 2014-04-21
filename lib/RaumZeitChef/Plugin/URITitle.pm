@@ -3,8 +3,9 @@ use RaumZeitChef::Plugin;
 use v5.14;
 use utf8;
 
+use RaumZeitChef::Log;
+
 # core modules
-use Sys::Syslog;
 use POSIX qw(strftime);
 use Encode ();
 
@@ -58,7 +59,7 @@ command 'urititle', match_rx => qr#(?<url>$re)#, method ($ircmsg, $match) {
             return 1 if ($data_read < 8192);
         };
 
-    syslog('info', 'fetching remote content '.$match);
+    log_info('fetching remote content '.$match);
 };
 
 1;

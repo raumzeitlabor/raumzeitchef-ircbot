@@ -3,8 +3,9 @@ use RaumZeitChef::Plugin;
 use v5.14;
 use utf8;
 
+use RaumZeitChef::Log;
+
 # core modules
-use Sys::Syslog;
 use POSIX qw(strftime);
 use Encode ();
 
@@ -23,7 +24,7 @@ command ping => method ($msg, $match) {
     my ($cmd, $rest) = ($match->{cmd}, $match->{rest});
     my $irc = $self->irc;
     if ((time() - $last_ping) < $ping_freq) {
-        syslog('info', '!ping ignored');
+        log_info('!ping ignored');
         if (!$said_idiot) {
             $self->say("Hey! Nur einmal alle 3 Minuten!");
             $said_idiot = 1;
@@ -57,10 +58,10 @@ command ping => method ($msg, $match) {
     # Zuerst den Raum-Ping (Port 8 am NPM), dann den Ping
     # in der E-Ecke aktivieren (Port 3 am NPM).
     $post = http_post 'http://172.22.36.1:5000/port/8', '1', sub {
-        say "Port 8 am NPM aktiviert!";
+        log_info("Port 8 am NPM aktiviert!");
         undef $post;
         $epost = http_post 'http://172.22.36.1:5000/port/3', '1', sub {
-            say "Port 3 am NPM aktiviert!";
+            log_info("Port 3 am NPM aktiviert!");
             undef $epost;
         };
     };
@@ -69,15 +70,15 @@ command ping => method ($msg, $match) {
         my $post;
         my $epost;
         $post = http_post 'http://172.22.36.1:5000/port/8', '0', sub {
-            say "Port 8 am NPM deaktiviert!";
+            log_info("Port 8 am NPM deaktiviert!");
             undef $post;
             $epost = http_post 'http://172.22.36.1:5000/port/3', '0', sub {
-                say "Port 3 am NPM deaktiviert!";
+                log_info("Port 3 am NPM deaktiviert!");
                 undef $epost;
             };
         };
     });
-    syslog('info', '!ping executed');
+    log_info('!ping executed');
 
 };
 

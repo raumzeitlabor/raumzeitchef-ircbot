@@ -2,7 +2,9 @@ package RaumZeitChef::IRC;
 use RaumZeitChef::Plugin;
 use v5.14;
 use utf8;
-use Sys::Syslog;
+
+use RaumZeitChef::Log;
+
 use Carp ();
 use Encode 'decode_utf8';
 use AnyEvent::IRC::Util 'prefix_nick';
@@ -35,12 +37,12 @@ method say ($msg) {
 event connect => method ($irc, $err) {
     return unless defined $err;
 
-    syslog('info', "Connect error: $err");
+    log_info("Connect error: $err");
     $self->cv->send;
 };
 
 event registered => method ($irc) {
-    syslog('info', 'Connected, joining channel');
+    log_info('Connected, joining channel');
     if (my $pw = $self->nickserv_pw) {
         $irc->send_srv(PRIVMSG => 'NickServ', (join ' ', 'identify', $self->nick, $pw));
     }
@@ -56,10 +58,10 @@ event registered => method ($irc) {
     my $nc_timer;
     $nc_timer = AnyEvent->timer(interval => 30, cb => sub {
         if ($irc->nick() ne $self->nick) {
-            syslog('info', 'trying to get back my nick...');
+            log_info('trying to get back my nick...');
             $irc->send_srv('NICK', $self->nick);
         } else {
-            syslog('info', 'got my nick back.');
+            log_info('got my nick back.');
             $nc_timer = undef;
         }
     });
