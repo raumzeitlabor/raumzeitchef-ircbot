@@ -1,10 +1,8 @@
 #!/usr/bin/env perl
 # vim:ts=4:sw=4:expandtab
 # © 2010-2011 Michael Stapelberg (see also: LICENSE)
-#
-# This script is an IRC bot (RaumZeitMPD) which displays the currently playing
-# song (querying the MPD) upon !stream and enables a light upon !ping.
-#
+# © 201x Simon Elsbrock
+# © 201x Maik Fischer
 
 use v5.14;
 use warnings FATAL => 'all';

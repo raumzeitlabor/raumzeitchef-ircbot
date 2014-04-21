@@ -3,7 +3,7 @@
 use v5.14;
 use utf8;
 
-package RaumZeitChef 1.8;
+package RaumZeitChef 1.9;
 
 # These modules are in core:
 # All these modules are not in core:
@@ -93,16 +93,15 @@ __END__
 
 =head1 NAME
 
-RaumZeitMPD - RaumZeitMPD IRC bot
+RaumZeitChef - RaumZeitChef IRC bot
 
 =head1 DESCRIPTION
 
-This module is an IRC bot (nickname RaumZeitMPD) which displays the currently
-playing song (querying the MPD) upon !stream and enables a light upon !ping.
+This module is an IRC bot (nickname RaumZeitChef)
 
 =head1 VERSION
 
-Version 1.6
+Version 1.9
 
 =head1 AUTHOR
 
@@ -111,6 +110,8 @@ Michael Stapelberg, C<< <michael at stapelberg.de> >>
 =head1 LICENSE AND COPYRIGHT
 
 Copyright 2010-2012 Michael Stapelberg.
+Copyright 201x Simon Elsbrock
+Copyright 201x Maik Fischer
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the BSD license.

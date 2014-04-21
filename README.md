@@ -1,8 +1,7 @@
-RaumZeitMPD ircbot
+RaumZeitChef ircbot
 ==================
 
-This git repository contains the source for the RaumZeitMPD IRC bot. It
-consists of two files:
+This git repository contains the source for the RaumZeitChef IRC bot.
 
 <dl>
   <dt>script/ircbot-chef</dt>
@@ -14,13 +13,13 @@ consists of two files:
 
 Development
 -----------
-To run the bot on your local machine, use `./script/ircbot-chef`. Note
-that you need to edit **lib/RaumZeitLabor/IRC/Chef.pm** as it is hard-coded for
-the RaumZeitLabor environment.
+To run the bot on your local machine, use `./script/ircbot-chef` and
+set `--channel` and `--nick` to something appropiate.
+
 
 Building a Debian package
 -------------------------
-The preferred way to deploy code on the Blackbox (where this bot traditionally
+The preferred way to deploy code on infra.rzl (where this bot traditionally
 runs on) is by installing a Debian package. This has many advantages:
 
 1. When we need to re-install for some reason, the package has the correct
@@ -31,18 +30,20 @@ runs on) is by installing a Debian package. This has many advantages:
 3. A simple `dpkg -l | grep -i raumzeit` is enough to find all
    RaumZeitLabor-related packages **and their version**. The precise location
    of initscripts, configuration and source code can be displayed by `dpkg -L
-   raumzeitmpd-ircbot`.
+   raumzeitchef-ircbot`.
 
 To create a Debian package, ensure you have `dpkg-dev` installed, then run:
 <pre>
 dpkg-buildpackage
 </pre>
 
-Now you have a package called `raumzeitmpd-ircbot_1.0-1_all.deb` which you can
-deploy on the Blackbox.
+Now you have a package called `raumzeitchef-ircbot_$VERSION_all.deb` which you can
+deploy on infra.rzl.
 
 Updating the Debian packaging
 -----------------------------
+
+**XXX Don't do this, it will overwrite your `.git` directory**
 
 If you introduce new dependencies, bump the version or change the description,
 you have to update the Debian packaging. First, install the packaging tools we
@@ -75,4 +76,3 @@ For online documentation about the Perl modules which are used:
 
 * http://search.cpan.org/perldoc?AnyEvent::IRC::Client
 * http://search.cpan.org/perldoc?Audio::MPD
-* http://search.cpan.org/perldoc?IO::All
