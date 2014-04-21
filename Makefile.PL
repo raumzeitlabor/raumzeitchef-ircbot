@@ -9,14 +9,15 @@ all_from 'lib/RaumZeitChef.pm';
 
 requires 'AnyEvent';
 requires 'AnyEvent::HTTP';
-requires 'AnyEvent::IRC';
 requires 'AnyEvent::HTTPD';
+requires 'AnyEvent::IRC';
 requires 'Audio::MPD';
 requires 'JSON::XS';
+requires 'List::MoreUtils';
+requires 'HTML::Parser';
 requires 'HTTP::Message';
 requires 'Moose';
 requires 'Method::Signatures::Simple';
-requires 'HTML::Parser';
 
 install_script 'ircbot-chef';
 
