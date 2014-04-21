@@ -12,15 +12,16 @@ use Encode ();
 # not in core
 use AnyEvent::HTTP;
 use HTTP::Request::Common ();
-use Method::Signatures::Simple;
 use Regexp::Common qw/URI/;
 use HTTP::Status qw/status_message/;
 use HTML::Entities qw/decode_entities/;
 use Encode qw/decode_utf8/;
 
+
 # derp.
 (my $re = $RE{URI}{HTTP}) =~ s/http/https?/;
-command 'urititle', match_rx => qr#(?<url>$re)#, method ($ircmsg, $match) {
+command 'urititle', match_rx => qr#(?<url>$re)#, sub {
+    my ($self, $ircmsg, $match) = @_;
     my $data_read = 0;
     my $partial_body = '';
     http_get $match->{url},

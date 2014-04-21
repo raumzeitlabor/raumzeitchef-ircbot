@@ -3,7 +3,6 @@ use RaumZeitChef::Plugin;
 use v5.14;
 use utf8;
 
-use Method::Signatures::Simple;
 use JSON::XS;
 use AnyEvent::HTTPD;
 
@@ -11,7 +10,8 @@ my %response = map { $_->[0] => { content => $_->[1] } }
     [missing => ['text/plain', 'No content received. Please post JSON']],
     [sucesss => ['text/html', '{"success":true}']];
 
-has httpd => (is => 'ro', default => method {
+has httpd => (is => 'ro', default => sub {
+    my ($self) = @_;
     my $httpd = AnyEvent::HTTPD->new(host => '127.0.0.1', port => 9091);
     $httpd->reg_cb('/to_irc' => sub {
         my ($httpd, $req) = @_;

@@ -12,7 +12,6 @@ use Encode ();
 # not in core
 use AnyEvent::HTTP;
 use HTTP::Request::Common ();
-use Method::Signatures::Simple;
 
 my $ping_freq = 180; # in seconds
 my $last_ping = 0;
@@ -20,7 +19,8 @@ my $said_idiot = 0;
 my $disable_timer = undef;
 my $disable_bell = undef;
 
-command ping => method ($msg, $match) {
+command ping => sub {
+    my ($self, $msg, $match) = @_;
     my ($cmd, $rest) = ($match->{cmd}, $match->{rest});
     my $irc = $self->irc;
     if ((time() - $last_ping) < $ping_freq) {

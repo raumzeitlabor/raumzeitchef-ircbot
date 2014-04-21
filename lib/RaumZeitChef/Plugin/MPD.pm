@@ -7,9 +7,9 @@ use RaumZeitChef::Log;
 
 # not in core
 use Audio::MPD;
-use Method::Signatures::Simple;
 
-command stream => method ($msg, $match) {
+command stream => sub {
+    my ($self, $msg, $match) = @_;
     my $rest = $match->{rest};
     if ($rest) {
         $self->say("Playing $rest");

@@ -6,14 +6,14 @@ use utf8;
 use RaumZeitChef::Log;
 use RaumZeitChef::IRC::Event;
 
-use Method::Signatures::Simple;
 use RaumZeitLabor::RaumStatus;
 use List::MoreUtils qw/natatime/;
 use List::Util qw/first/;
 
 has raumstatus => (
     is => 'ro',
-    default => method {
+    default => sub {
+        my ($self) = @_;
         my $status = RaumZeitLabor::RaumStatus->new;
         $status->register_join(sub { $self->_laborant_join($self->benutzerdb_to_channel(@_)) });
         $status->register_part(sub { $self->_laborant_part($self->benutzerdb_to_channel(@_)) });
@@ -22,7 +22,8 @@ has raumstatus => (
     },
 );
 
-method _laborant_join (@members) {
+sub _laborant_join {
+    my ($self, @members) = @_;
     $self->set_voice(
         grep {
             $self->has_mode('-v', $_);
@@ -30,7 +31,8 @@ method _laborant_join (@members) {
     );
 }
 
-method _laborant_part (@members) {
+sub _laborant_part {
+    my ($self, @members) = @_;
     $self->remove_voice(
         grep {
             $self->has_mode('+v', $_);
@@ -38,7 +40,8 @@ method _laborant_part (@members) {
     );
 }
 
-event join => method ($irc, $nick, $channel, $is_myself) {
+event join => sub {
+    my ($self, $irc, $nick, $channel, $is_myself) = @_;
     if ($is_myself) {
         # enter the event loop one more time, since channel_list isn't up to date
         state $t = AnyEvent->timer(after => 0.5, cb => sub {
@@ -61,14 +64,16 @@ event join => method ($irc, $nick, $channel, $is_myself) {
     }
 };
 
-func _normalize_channick($nick) {
+sub _normalize_channick {
+    my ($nick) = @_;
     for (lc $nick) {
         s/[^a-z\d]//g;
         return $_
     }
 }
 
-method has_mode ($mode, $nick) {
+sub has_mode {
+    my ($self, $mode, $nick) = @_;
     my $chan = $self->channel;
     my ($want, $mode_char) = $mode =~ /(.)(.)/;
     $want = $want eq '+' ? 1 : 0;
@@ -79,14 +84,16 @@ method has_mode ($mode, $nick) {
     return ($m->{$mode_char} ? 1 : 0) == $want
 }
 
-method list_channel_nicks {
+sub list_channel_nicks {
+    my ($self) = @_;
     my %nicks = %{ $self->irc->channel_list($self->channel) || {} };
     return keys %nicks;
 }
 
 # given a benutzerdb-nick it tries to find a matching nick in our channel,
 # returning the channel nick
-method benutzerdb_to_channel (@members) {
+sub benutzerdb_to_channel {
+    my ($self, @members) = @_;
     my @nicks = $self->list_channel_nicks;
 
     return map {
@@ -95,10 +102,12 @@ method benutzerdb_to_channel (@members) {
     } @members
 }
 
-method channel_to_benutzerdb ($member) {
+sub channel_to_benutzerdb {
+    my ($self, $member) = @_;
 }
 
-method set_voice (@nicks) {
+sub set_voice {
+    my ($self, @nicks) = @_;
     return unless @nicks;
     log_debug("give: @nicks");
 
@@ -109,7 +118,8 @@ method set_voice (@nicks) {
     }
 }
 
-method remove_voice (@nicks) {
+sub remove_voice {
+    my ($self, @nicks) = @_;
     return unless @nicks;
     log_debug("remove: @nicks");
 

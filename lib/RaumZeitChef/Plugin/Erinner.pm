@@ -10,7 +10,6 @@ use POSIX qw(strftime);
 
 # not in core
 use AnyEvent::HTTP;
-use Method::Signatures::Simple;
 
 # pizza timer
 my $pizza_timer_user;
@@ -22,7 +21,8 @@ my $pizza_disable_timer = undef; # timer used for disabling ping+
 my @answers = ("Alles klar.", "Yup.", "Okidoki.", "Eyup.", "Roger.");
 
 # timer ohne ping+ (irc-only)
-command erinner => method ($ircmsg, $match) {
+command erinner => sub {
+    my ($self, $ircmsg, $match) = @_;
     my ($cmd, $rest) = ($match->{cmd}, $match->{rest});
     return unless $rest =~ /^(.+) an (.+) in (\d{1,2}) ?(h|m|s)/;
 
@@ -48,7 +48,8 @@ command erinner => method ($ircmsg, $match) {
 command timer => \&timer;
 command pizza => \&timer;
 # timer mit ping+ (auf 1 user begrenzt)
-method timer ($ircmsg, $match) {
+sub timer {
+    my ($self, $ircmsg, $match) = @_;
     my ($cmd, $rest) = ($match->{cmd}, $match->{rest});
     if ($cmd eq 'timer' and $rest eq 'cancel') {
         if (!$pizza_timer) {
