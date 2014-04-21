@@ -4,6 +4,7 @@ use v5.14;
 use utf8;
 
 use RaumZeitChef::Log;
+use RaumZeitChef::IRC::Event;
 
 use Method::Signatures::Simple;
 use RaumZeitLabor::RaumStatus;

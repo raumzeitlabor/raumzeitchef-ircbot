@@ -1,7 +1,9 @@
 package RaumZeitChef::IRC;
-use RaumZeitChef::Plugin;
 use v5.14;
 use utf8;
+
+use Moose::Role;
+use RaumZeitChef::IRC::Event;
 
 use RaumZeitChef::Log;
 
@@ -10,25 +12,25 @@ use Encode 'decode_utf8';
 use AnyEvent::IRC::Util 'prefix_nick';
 use AnyEvent::IRC::Client;
 
-requires qw( server port nick channel nickserv_pw cv );
 
-has irc => (is => 'ro', default => method {
-    my $irc = AnyEvent::IRC::Client->new;
+has irc => (is => 'ro', default => sub { AnyEvent::IRC::Client->new });
 
-    $irc->set_exception_cb(func ($e, $event) {
+before run => sub {
+    my ($self) = @_;
+    $self->irc->set_exception_cb(sub {
+        my ($e, $event) = @_;
         Carp::cluck("caught exception in event '$event': $e");
     });
 
     for my $attr ($self->meta->get_all_attributes) {
-        next unless $attr->does('RaumZeitChef::Trait::IrcEvent');
+        next unless $attr->does('RaumZeitChef::Trait::IRC::Event');
         my $name = $attr->event_name;
         my $cb = $attr->code;
-        $irc->reg_cb($name => sub { $self->$cb(@_) });
+        $self->irc->reg_cb($name => sub { $self->$cb(@_) });
+        log_debug("registered event $name");
     }
 
-    return $irc;
-});
-
+};
 
 event connect => sub {
     my ($self, $irc, $err) = @_;
