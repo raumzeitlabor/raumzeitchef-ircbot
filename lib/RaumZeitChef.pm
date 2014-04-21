@@ -8,8 +8,6 @@ package RaumZeitChef 1.8;
 # These modules are in core:
 # All these modules are not in core:
 use AnyEvent;
-use Method::Signatures::Simple;
-
 use Moose;
 
 use RaumZeitChef::Log;
@@ -48,18 +46,45 @@ sub run {
     log_info('Starting up');
 
     while (1) {
-        log_info("Connecting to $host as $nick...");
+        # resolve hosts manually.
+        # For whatever reason, tcp_connect doesn't try to connect to all available hosts.
+        # since we wait for 5 seconds after a disconnection,
+        # connecting to a available host would take unnecessarily long.
+        my @hosts = _resolve_host($server, $port);
+        for my $host (@hosts) {
+            log_info("Connecting to $host as $nick...");
 
-        $self->irc->connect($server, $port, { nick => $nick, user => $nick });
-        $self->cv->recv;
+            $self->irc->connect($host, $port, { nick => $nick, user => $nick });
+            $self->cv->recv;
 
-        $self->cv(AE::cv);
+            $self->cv(AE::cv);
 
+        }
         # Wait 5 seconds before reconnecting, else we might get banned
         log_info('Connection lost.');
         sleep 5;
     }
 }
+
+sub _resolve_host {
+    my ($host, $port) = @_;
+    my $resolve = AnyEvent->condvar;
+    my @hosts;
+    AnyEvent::Socket::resolve_sockaddr(
+        $host, $port, 'tcp', undef, undef, sub {
+            for (@_) {
+                my $sa = $_->[3];
+                my (undef, $ipn) = AnyEvent::Socket::unpack_sockaddr($sa);
+                push @hosts, AnyEvent::Socket::format_address($ipn);
+            }
+            $resolve->send;
+        }
+    );
+    $resolve->recv;
+
+    return @hosts;
+}
+
 
 1;
 
