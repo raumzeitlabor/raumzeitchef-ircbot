@@ -9,7 +9,6 @@ use Carp ();
 use Encode 'decode_utf8';
 use AnyEvent::IRC::Util 'prefix_nick';
 use AnyEvent::IRC::Client;
-use Method::Signatures::Simple;
 
 requires qw( server port nick channel nickserv_pw cv );
 
@@ -30,18 +29,17 @@ has irc => (is => 'ro', default => method {
     return $irc;
 });
 
-method say ($msg) {
-    $self->irc->send_long_message('utf8', 0, 'PRIVMSG', $self->channel, $msg);
-}
 
-event connect => method ($irc, $err) {
+event connect => sub {
+    my ($self, $irc, $err) = @_;
     return unless defined $err;
 
     log_info("Connect error: $err");
     $self->cv->send;
 };
 
-event registered => method ($irc) {
+event registered => sub {
+    my ($self, $irc) = @_;
     log_info('Connected, joining channel');
     if (my $pw = $self->nickserv_pw) {
         $irc->send_srv(PRIVMSG => 'NickServ', (join ' ', 'identify', $self->nick, $pw));
@@ -67,17 +65,10 @@ event registered => method ($irc) {
     });
 };
 
-event disconnect => method { $self->cv->send };
+event disconnect => sub { shift->cv->send };
 
-method get_all_commands {
-    return map {
-        [ $_->command_name, $_->match_rx, $_->code ]
-    } grep {
-        $_->does('RaumZeitChef::Trait::Command')
-    } $self->meta->get_all_attributes;
-}
-
-event publicmsg => method ($irc, $channel, $ircmsg) {
+event publicmsg => sub {
+    my ($self, $irc, $channel, $ircmsg) = @_;
     my $line = $ircmsg->{params}->[1];
     my $text = decode_utf8($line); # decode_n_filter($line);
     my $from_nick = decode_utf8(prefix_nick($ircmsg->{prefix}));
@@ -108,5 +99,22 @@ event publicmsg => method ($irc, $channel, $ircmsg) {
     #    $conn->send_chan($channel, 'PRIVMSG', ($channel, "Enter !stream to see what's playing."));
     #}
 };
+
+sub say {
+    my ($self, $msg) = @_;
+    $self->irc->send_long_message('utf8', 0, 'PRIVMSG', $self->channel, $msg);
+}
+
+sub get_all_commands {
+    my ($self) = @_;
+    return map {
+        [ $_->command_name, $_->match_rx, $_->code ]
+    } grep {
+        $_->does('RaumZeitChef::Trait::Command')
+    } $self->meta->get_all_attributes;
+}
+
+
+no Moose::Role;
 
 1;
