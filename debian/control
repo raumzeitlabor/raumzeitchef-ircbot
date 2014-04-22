@@ -1,20 +1,21 @@
 Source: raumzeitchef-ircbot
 Section: perl
 Priority: optional
-Maintainer: Michael Stapelberg <michael@stapelberg.de>
-Build-Depends: debhelper (>= 8)
+Maintainer: Maik Fischer <maikf@qu.cx>
+Build-Depends: debhelper (>= 9.20120312)
 Build-Depends-Indep: libanyevent-http-perl,
+ libanyevent-httpd-perl,
  libanyevent-irc-perl,
  libanyevent-perl,
- libanyevent-httpd-perl,
  libaudio-mpd-perl,
- libjson-xs-perl,
- liburi-perl,
- libhttp-message-perl,
- libmoose-perl,
- libmethod-signatures-simple-perl,
  libhtml-parser-perl,
- perl
+ libhttp-message-perl,
+ libjson-xs-perl,
+ liblist-moreutils-perl,
+ libmethod-signatures-simple-perl,
+ libmoose-perl,
+ liburi-perl,
+ perl (>= 5.14.0)
 Standards-Version: 3.9.2
 Homepage: http://search.cpan.org/dist/RaumZeitMPD/
 
@@ -22,19 +23,22 @@ Package: raumzeitchef-ircbot
 Architecture: all
 Depends: ${misc:Depends}, ${perl:Depends},
  libanyevent-http-perl,
+ libanyevent-httpd-perl,
  libanyevent-irc-perl,
  libanyevent-perl,
- libanyevent-httpd-perl,
  libaudio-mpd-perl,
- libjson-xs-perl,
- liburi-perl,
- libhttp-message-perl,
- libmoose-perl,
- libmethod-signatures-simple-perl,
  libhtml-parser-perl,
- perl
+ libhttp-message-perl,
+ libjson-xs-perl,
+ liblist-moreutils-perl,
+ libmethod-signatures-simple-perl,
+ libmoose-perl,
+ liburi-perl,
+ perl (>= 5.14.0)
 Description: RaumZeitMPD IRC bot
  RaumZeitMPD is an IRC bot (nickname RaumZeitMPD) which displays the currently
  playing song (querying the MPD) upon !stream and enables a light upon !ping.
  .
  This description was automagically extracted from the module by dh-make-perl.
+
+Package: libraumzeitchef-perl

@@ -1,7 +1,7 @@
-Format-Specification: http://anonscm.debian.org/viewvc/dep/web/deps/dep5.mdwn?view=markup&pathrev=135
-Maintainer: Michael Stapelberg, C<< <michael at stapelberg.de> >>
-Source: http://search.cpan.org/dist/RaumZeitMPD/
-Name: RaumZeitMPD
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Source: https://metacpan.org/release/RaumZeitChef
+Upstream-Contact: Michael Stapelberg, C<< <michael at stapelberg.de> >>
+Upstream-Name: RaumZeitChef
 DISCLAIMER: This copyright info was automatically extracted 
  from the perl module. It may not be accurate, so you better 
  check the module sources in order to ensure the module for its 
@@ -13,17 +13,12 @@ DISCLAIMER: This copyright info was automatically extracted
 
 Files: *
 Copyright: Michael Stapelberg, C<< <michael at stapelberg.de> >>
-License: unparsable
+License: 
 
 Files: debian/*
 Copyright: 2012, Michael Stapelberg <michael@stapelberg.de>
-License: unparsable or Artistic or GPL-1+
-
-License: unparsable
- No known license could be automatically determined for this module.
- If this module conforms to a commonly used license, please report this
- as a bug in dh-make-perl. In any case, please find the proper license
- and fix this file!
+ 2014, Maik Fischer <maikf@qu.cx>
+License: Artistic or GPL-1+
 
 License: Artistic
  This program is free software; you can redistribute it and/or modify
