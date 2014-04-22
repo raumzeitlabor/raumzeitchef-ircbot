@@ -43,8 +43,6 @@ deploy on infra.rzl.
 Updating the Debian packaging
 -----------------------------
 
-**XXX Don't do this, it will overwrite your `.git` directory**
-
 If you introduce new dependencies, bump the version or change the description,
 you have to update the Debian packaging. First, install the packaging tools we
 are going to use:
@@ -55,15 +53,11 @@ apt-get install dh-make-perl
 Then, run the following commands:
 <pre>
 perl Makefile.PL
-mv debian/raumzeitmpd-ircbot.{init,postinst} .
-rm -rf debian
-dh-make-perl -p raumzeitmpd-ircbot --source-format 1
-mv raumzeitmpd-ircbot.{init,postinst} debian/
+make manifest
+env DEBFULLNAME='Your Name' DEBEMAIL='your@full.name' dh-make-perl refresh
 </pre>
 
-By the way, the originals for raumzeitmpd-ircbot.{init,postinst} are
-`/usr/share/debhelper/dh_make/debian/init.d.ex` and
-`/usr/share/debhelper/dh_make/debian/postinst.ex`.
+Inspect the changes to `debian/` and commit them.
 
 See also
 --------
