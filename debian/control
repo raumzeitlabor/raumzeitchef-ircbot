@@ -14,8 +14,9 @@ Build-Depends-Indep: libanyevent-http-perl,
  liblist-moreutils-perl,
  libmethod-signatures-simple-perl,
  libmoose-perl,
+ libmoosex-classattribute-perl,
  liburi-perl,
- perl (>= 5.14.0)
+ perl (>= 5.15.2)
 Standards-Version: 3.9.2
 Homepage: http://search.cpan.org/dist/RaumZeitMPD/
 
@@ -33,6 +34,7 @@ Depends: ${misc:Depends}, ${perl:Depends},
  liblist-moreutils-perl,
  libmethod-signatures-simple-perl,
  libmoose-perl,
+ libmoosex-classattribute-perl,
  liburi-perl,
  perl (>= 5.14.0)
 Description: RaumZeitMPD IRC bot
