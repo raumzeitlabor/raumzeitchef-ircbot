@@ -2,7 +2,7 @@ Source: raumzeitchef-ircbot
 Section: perl
 Priority: optional
 Maintainer: Maik Fischer <maikf@qu.cx>
-Build-Depends: debhelper (>= 9.20120312)
+Build-Depends: debhelper (>= 9.20120312), dh-systemd
 Build-Depends-Indep: libanyevent-http-perl,
  libanyevent-httpd-perl,
  libanyevent-irc-perl,
@@ -18,7 +18,7 @@ Build-Depends-Indep: libanyevent-http-perl,
  liburi-perl,
  perl (>= 5.15.2)
 Standards-Version: 3.9.2
-Homepage: http://search.cpan.org/dist/RaumZeitMPD/
+Homepage: https://github.com/raumzeitlabor/raumzeitchef-ircbot
 
 Package: raumzeitchef-ircbot
 Architecture: all
@@ -37,10 +37,7 @@ Depends: ${misc:Depends}, ${perl:Depends},
  libmoosex-classattribute-perl,
  liburi-perl,
  perl (>= 5.14.0)
-Description: RaumZeitMPD IRC bot
- RaumZeitMPD is an IRC bot (nickname RaumZeitMPD) which displays the currently
- playing song (querying the MPD) upon !stream and enables a light upon !ping.
- .
- This description was automagically extracted from the module by dh-make-perl.
+Description: RaumZeitChef IRC bot
+ RaumZeitChef is an IRC bot (nickname RaumZeitChef)
 
 Package: libraumzeitchef-perl
