@@ -3,12 +3,10 @@ use RaumZeitChef::Plugin;
 use v5.10;
 use utf8;
 
-use RaumZeitChef::Log;
-
 # not in core
 use Audio::MPD;
 
-command stream => sub {
+action stream => sub {
     my ($self, $msg, $match) = @_;
     my $rest = $match->{rest};
     if ($rest) {

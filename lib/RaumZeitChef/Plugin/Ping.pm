@@ -3,8 +3,6 @@ use RaumZeitChef::Plugin;
 use v5.14;
 use utf8;
 
-use RaumZeitChef::Log;
-
 # core modules
 use POSIX qw(strftime);
 use Encode ();
@@ -19,7 +17,7 @@ my $said_idiot = 0;
 my $disable_timer = undef;
 my $disable_bell = undef;
 
-command ping => sub {
+action ping => sub {
     my ($self, $msg, $match) = @_;
     my ($cmd, $rest) = ($match->{cmd}, $match->{rest});
     my $irc = $self->irc;

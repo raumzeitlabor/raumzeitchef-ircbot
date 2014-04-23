@@ -12,7 +12,6 @@ use Encode 'decode_utf8';
 use AnyEvent::IRC::Util 'prefix_nick';
 use AnyEvent::IRC::Client;
 
-
 has irc => (is => 'ro', default => sub { AnyEvent::IRC::Client->new });
 
 before run => sub {
@@ -77,18 +76,18 @@ event publicmsg => sub {
 
     # for now, commands cannot be added at runtime
     # so it is okay to cache them
-    state $commands ||= [ $self->get_all_commands ];
+    state $actions ||= $self->plugin_factory->build_all_actions;
 
-    for my $cmd (@$commands) {
-        my ($name, $rx, $cb) = @$cmd;
-        if ($text =~ $rx) {
+    for my $act (@$actions) {
+        my ($rx, $cb) = @$act;
+        if ($text =~ /$rx/) {
             my $msg = { %+ };
             die "regex must not have 'text' capture group"
                 if exists $msg->{text};
 
             $msg->{text} = $text;
             $msg->{from} = $from_nick;
-            $self->$cb($ircmsg, $msg);
+            $cb->($ircmsg, $msg);
             # TODO should we return here? don't return based on $cb return value…
             # also: don't return after the first found command, this might kill smth. like:
             # !erinner mich an http://example.com in 1s
@@ -106,16 +105,6 @@ sub say {
     my ($self, $msg) = @_;
     $self->irc->send_long_message('utf8', 0, 'PRIVMSG', $self->channel, $msg);
 }
-
-sub get_all_commands {
-    my ($self) = @_;
-    return map {
-        [ $_->command_name, $_->match_rx, $_->code ]
-    } grep {
-        $_->does('RaumZeitChef::Trait::Command')
-    } $self->meta->get_all_attributes;
-}
-
 
 no Moose::Role;
 

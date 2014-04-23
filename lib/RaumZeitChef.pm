@@ -6,6 +6,8 @@ use utf8;
 package RaumZeitChef 1.9;
 
 # These modules are in core:
+use File::Basename ();
+
 # All these modules are not in core:
 use AnyEvent;
 use Moose;
@@ -17,31 +19,25 @@ has [qw/server port nick channel nickserv_pw/] =>
 
 has cv => (is => 'rw', default => sub { AE::cv });
 
+has plugin_factory => (
+    is => 'ro',
+    default => sub { RaumZeitChef::PluginFactory->new },
+);
+
+
 # load base roles
-with("RaumZeitChef::$_") for qw/IRC HTTPD/;
+# with("RaumZeitChef::$_") for qw/IRC HTTPD/;
+with 'RaumZeitChef::IRC';
 
-# automatically consume all plugins
-{
-    my @class_prefix = (__PACKAGE__, 'Plugin');
-    my $class_path = join '/', @class_prefix;
-
-    # find files via shell globbing
-    my @files = glob '{' . join(',', @INC) . "}/${class_path}/*.pm";
-    #  transform filenames to RaumZeitChef::Plugin::*
-    my @plugins = map {
-        my ($stem) = m[/ ( [^/]+ ) \.pm $]x;
-        join '::', @class_prefix, $stem;
-    } @files;
-
-    # don't uniq(@plugins); if we have multiple files, die instead
-    with($_) for @plugins;
-}
-
+use RaumZeitChef::PluginFactory;
 sub run {
     my ($self) = @_;
     my $nick = $self->nick;
     my $server = $self->server;
     my $port = $self->port;
+
+    RaumZeitChef::PluginSuperClass->meta->set_class_attribute_value($_, $self->$_)
+        for qw/nick channel irc/;
 
     log_info('Starting up');
 
@@ -87,7 +83,6 @@ sub _resolve_host {
 
 
 1;
-
 __END__
 
 

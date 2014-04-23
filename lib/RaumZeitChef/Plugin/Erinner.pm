@@ -21,7 +21,7 @@ my $pizza_disable_timer = undef; # timer used for disabling ping+
 my @answers = ("Alles klar.", "Yup.", "Okidoki.", "Eyup.", "Roger.");
 
 # timer ohne ping+ (irc-only)
-command erinner => sub {
+action erinner => sub {
     my ($self, $ircmsg, $match) = @_;
     my ($cmd, $rest) = ($match->{cmd}, $match->{rest});
     return unless $rest =~ /^(.+) an (.+) in (\d{1,2}) ?(h|m|s)/;
@@ -45,8 +45,8 @@ command erinner => sub {
 
 };
 
-command timer => \&timer;
-command pizza => \&timer;
+action timer => \&timer;
+action pizza => \&timer;
 # timer mit ping+ (auf 1 user begrenzt)
 sub timer {
     my ($self, $ircmsg, $match) = @_;

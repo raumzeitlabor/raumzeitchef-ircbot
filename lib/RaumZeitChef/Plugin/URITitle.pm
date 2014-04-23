@@ -3,8 +3,6 @@ use RaumZeitChef::Plugin;
 use v5.14;
 use utf8;
 
-use RaumZeitChef::Log;
-
 # core modules
 use POSIX qw(strftime);
 use Encode ();
@@ -20,16 +18,18 @@ use Encode qw/decode_utf8/;
 
 # derp.
 (my $re = $RE{URI}{HTTP}) =~ s/http/https?/;
-command 'urititle', match_rx => qr#(?<url>$re)#, sub {
+
+action 'urititle', match => qr#(?<url>$re)#, sub {
     my ($self, $ircmsg, $match) = @_;
     my $data_read = 0;
     my $partial_body = '';
-    http_get $match->{url},
+    http_get($match->{url},
         timeout => 3,
         on_header => sub { $_[0]{"content-type"} =~ /^text\/html\s*(?:;|$)/ },
         on_body => sub {
             my ($data, $headers) = @_;
 
+            # return unless defined $data;
             if ($headers->{Status} !~ m/^2/ && $headers->{Status} !~ m/^59/) {
                 $self->say('[Link Info] error: '.$headers->{Status}." ".status_message($headers->{Status}));
                 return 0;
@@ -58,9 +58,10 @@ command 'urititle', match_rx => qr#(?<url>$re)#, sub {
 
             # no title found, continue if < 8kb
             return 1 if ($data_read < 8192);
-        };
+        }
+    );
 
-    log_info('fetching remote content '.$match);
+    log_info('fetching remote content ' . $match->{url});
 };
 
 1;

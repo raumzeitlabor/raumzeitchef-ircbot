@@ -3,12 +3,11 @@ use RaumZeitChef::Plugin;
 use v5.14;
 use utf8;
 
-use RaumZeitChef::Log;
-use RaumZeitChef::IRC::Event;
-
 use RaumZeitLabor::RaumStatus;
 use List::MoreUtils qw/natatime/;
 use List::Util qw/first/;
+
+no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 has raumstatus => (
     is => 'ro',
