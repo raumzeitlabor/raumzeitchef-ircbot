@@ -13,6 +13,9 @@ use AnyEvent;
 use Moose;
 
 use RaumZeitChef::Log;
+use RaumZeitChef::PluginFactory;
+use RaumZeitChef::PluginSuperClass;
+
 
 has [qw/server port nick channel nickserv_pw/] =>
     (is => 'ro', required => 1);
@@ -29,7 +32,6 @@ has plugin_factory => (
 # with("RaumZeitChef::$_") for qw/IRC HTTPD/;
 with 'RaumZeitChef::IRC';
 
-use RaumZeitChef::PluginFactory;
 sub run {
     my ($self) = @_;
     my $nick = $self->nick;
