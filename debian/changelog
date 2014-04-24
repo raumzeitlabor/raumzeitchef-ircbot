@@ -1,3 +1,9 @@
+raumzeitchef-ircbot (1.9-1) unstable; urgency=medium
+
+  * lots and lots of changes
+
+ -- Maik Fischer <maikf@qu.cx>  Thu, 24 Apr 2014 00:52:38 +0200
+
 raumzeitchef-ircbot (1.7-1) unstable; urgency=low
 
   * Initial Release.

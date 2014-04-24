@@ -32,9 +32,10 @@ runs on) is by installing a Debian package. This has many advantages:
    of initscripts, configuration and source code can be displayed by `dpkg -L
    raumzeitchef-ircbot`.
 
-To create a Debian package, ensure you have `dpkg-dev` installed, then run:
+To create a Debian package, ensure you have `dpkg-dev` installed, then run
+as **root** to ensure the Modules are installed globally:
 <pre>
-dpkg-buildpackage
+sudo dpkg-buildpackage -uc -us
 </pre>
 
 Now you have a package called `raumzeitchef-ircbot_$VERSION_all.deb` which you can
@@ -54,7 +55,9 @@ Then, run the following commands:
 <pre>
 perl Makefile.PL
 make manifest
-env DEBFULLNAME='Your Name' DEBEMAIL='your@full.name' dh-make-perl refresh
+export DEBFULLNAME='Your Name' DEBEMAIL='your@full.name'
+dh-make-perl refresh
+debchange --nmu
 </pre>
 
 Inspect the changes to `debian/` and commit them.

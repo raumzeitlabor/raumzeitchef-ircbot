@@ -5,9 +5,9 @@
 ^inc/
 ^.lwpcookies
 ^.last_cover_stats
-^pod2htm*.tmp
+^pod2htm.*.tmp
 ^pm_to_blib
 ^RaumZeitChef-.*.tar.gz
-^.*.sw?
+^.*.sw.
 ^.git
 ^debian

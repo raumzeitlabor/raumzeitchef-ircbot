@@ -1,0 +1,9 @@
+[Unit]
+Description=RaumZeitChef IRC Bot
+
+[Service]
+User=nobody
+ExecStart=/usr/bin/ircbot-chef 
+
+[Install]
+WantedBy=multi-user.target

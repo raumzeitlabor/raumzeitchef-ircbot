@@ -2,7 +2,8 @@ Source: raumzeitchef-ircbot
 Section: perl
 Priority: optional
 Maintainer: Maik Fischer <maikf@qu.cx>
-Build-Depends: debhelper (>= 9.20120312), dh-systemd
+Build-Depends: debhelper (>= 9.20120312),
+ dh-systemd
 Build-Depends-Indep: libanyevent-http-perl,
  libanyevent-httpd-perl,
  libanyevent-irc-perl,
@@ -12,7 +13,6 @@ Build-Depends-Indep: libanyevent-http-perl,
  libhttp-message-perl,
  libjson-xs-perl,
  liblist-moreutils-perl,
- libmethod-signatures-simple-perl,
  libmoose-perl,
  libmoosex-classattribute-perl,
  liburi-perl,
@@ -32,12 +32,9 @@ Depends: ${misc:Depends}, ${perl:Depends},
  libhttp-message-perl,
  libjson-xs-perl,
  liblist-moreutils-perl,
- libmethod-signatures-simple-perl,
  libmoose-perl,
  libmoosex-classattribute-perl,
  liburi-perl,
  perl (>= 5.14.0)
 Description: RaumZeitChef IRC bot
  RaumZeitChef is an IRC bot (nickname RaumZeitChef)
-
-Package: libraumzeitchef-perl
