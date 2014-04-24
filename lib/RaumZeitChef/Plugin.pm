@@ -25,8 +25,7 @@ package RaumZeitChef::Meta::Action {
 
 (my $import, *unimport) = Moose::Exporter->build_import_methods(
     with_meta => ['action', 'before_action'],
-    also => ['Moose', 'RaumZeitChef::IRC::Event'],
-    as_is => [ @RaumZeitChef::Log::EXPORT ],
+    also => ['Moose', 'RaumZeitChef::IRC::Event', 'RaumZeitChef::Log'],
 );
 
 sub import {

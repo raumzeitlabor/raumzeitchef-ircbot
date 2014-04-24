@@ -14,6 +14,7 @@ requires 'AnyEvent::IRC';
 requires 'Audio::MPD';
 requires 'JSON::XS';
 requires 'List::MoreUtils';
+requires 'Log::Dispatch';
 requires 'HTML::Parser';
 requires 'HTTP::Message';
 requires 'Moose';
