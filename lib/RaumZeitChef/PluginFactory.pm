@@ -109,8 +109,8 @@ sub find_plugins {
     my $rel_path_dir = join '/', @prefix;
 
     # get first Plugin directory found via shell globbing
-    my ($dir) = glob('{' . join(',', @INC) . "}/$rel_path_dir");
-    say $dir;
+    my ($dir) = grep { -d $_ } glob('{' . join(',', @INC) . "}/$rel_path_dir");
+    log_debug("using Plugin directory $dir");
 
     my @plugins;
     for my $abs_path (glob "$dir/*.pm") {
