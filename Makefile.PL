@@ -19,6 +19,7 @@ requires 'HTML::Parser';
 requires 'HTTP::Message';
 requires 'Moose';
 requires 'MooseX::ClassAttribute';
+requires 'URI';
 
 install_script 'ircbot-chef';
 

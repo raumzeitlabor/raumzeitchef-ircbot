@@ -98,6 +98,7 @@ sub _build_plugins {
         $PLUGIN_SUPER->meta->set_class_attribute_value($attr, $o);
     }
 
+    $_->can('init_plugin') and $_->init_plugin for values %instances;
     return \%instances;
 }
 
