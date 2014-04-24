@@ -3,7 +3,6 @@ Section: perl
 Priority: optional
 Maintainer: Maik Fischer <maikf@qu.cx>
 Build-Depends: debhelper (>= 9.20120312),
- dh-systemd
 Build-Depends-Indep: libanyevent-http-perl,
  libanyevent-httpd-perl,
  libanyevent-irc-perl,
