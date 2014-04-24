@@ -8,7 +8,6 @@ use Time::Seconds;
 
 use AnyEvent::HTTP;
 use JSON::XS;
-use Data::Dump;
 use URI;
 
 my $event_uri = 'https://api.github.com/orgs/raumzeitlabor/events';
@@ -97,7 +96,6 @@ sub poll_github_events {
     state ($etag, $poll_interval, $poll);
 
     return sub {
-        use Data::Dump;
         $poll = AnyEvent->condvar(cb => sub { $self->_mk_timer(shift->recv) });
         http_get $event_uri, ($etag && (headers => { 'If-None-Match' => $etag })), sub {
             my ($data, $h) = @_;
