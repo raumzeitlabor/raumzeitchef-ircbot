@@ -12,21 +12,32 @@ use URI;
 
 my $event_uri = 'https://api.github.com/orgs/raumzeitlabor/events';
 
-has timer => (is => 'rw');
+has etag => (is => 'rw');
 
 sub init_plugin {
     my ($self) = @_;
-    $self->_mk_timer(0);
+    $self->interval(0);
 }
 
-# XXX I'm really unpleased with the shenanigans I have to do
-# to setup a non blocking loop. There ought to be a better way.
+sub interval {
+    my ($self, $seconds) = @_;
+    state $interval = 60;
 
-sub _mk_timer {
-    my ($self, $next_poll) = @_;
-    log_debug("next poll in $next_poll seconds at " . localtime(time + $next_poll));
-    my $t = AnyEvent->timer(after => $next_poll, cb => $self->poll_github_events);
-    $self->timer($t);
+    if ($seconds != 0) {
+        return if $interval == $seconds;
+        $interval = $seconds;
+        log_info("setting new interval: $interval");
+    }
+
+    state $t;
+    $t = AnyEvent->timer(
+        after => $seconds,
+        interval => $interval,
+        cb => sub {
+            $self->poll_github_events;
+            log_debug("next poll in $interval seconds at " . localtime(time + $interval));
+        }
+    );
 }
 
 sub parse_github_events {
@@ -103,52 +114,69 @@ sub _api_to_html_url {
 
 sub poll_github_events {
     my ($self) = @_;
-    state ($etag, $poll_interval, $poll);
+    my $etag = $self->etag;
 
-    return sub {
-        $poll = AnyEvent->condvar(cb => sub { $self->_mk_timer(shift->recv) });
-        http_get $event_uri, ($etag && (headers => { 'If-None-Match' => $etag })), sub {
-            my ($data, $h) = @_;
-            my $status = $h->{Status};
+    http_get $event_uri, ($etag && (headers => { 'If-None-Match' => $etag })), sub {
+        $self->handle_response(@_);
+    };
+    return;
+}
 
-            # internal error
-            if ($status =~ /^59/) {
-                log_error("error: $status $h->{Reason}");
-                return $poll->send(5 * ONE_MINUTE);
-            }
+sub handle_response {
+    my ($self, $data, $h) = @_;
+    my $status = $h->{Status};
 
-            # X-Poll-Interval isn't always set, we have to save it
-            if ($h->{'x-poll-interval'}) {
-                $poll_interval = $h->{'x-poll-interval'};
-                log_info("setting new interval: $poll_interval");
-            }
-            if ($h->{etag}) {
-                $etag = $h->{etag};
-            }
+    # internal error
+    if ($status =~ /^59/) {
+        log_error("error: $status $h->{Reason}");
+        $self->interval(5 * ONE_MINUTE);
+        return;
+    }
 
-            # we exhausted our API limit, be a good citizen and wait
-            if (exists $h->{'x-ratelimit-remaining'}
-                and $h->{'x-ratelimit-remaining'} == 0)
-            {
-                log_error('ratelimit exceeded, we are banned from github');
-                my $unbanned_after = $h->{'x-ratelimit-reset'} - time;
-                return $poll->send($unbanned_after);
-            }
+    if ($h->{'x-poll-interval'}) {
+        $self->interval($h->{'x-poll-interval'});
+    }
+    if ($h->{etag}) {
+        $self->etag($h->{etag});
+    }
 
-            # nothing has changed
-            if ($status == 304) {
-                log_debug('nothing has changed');
-            }
-            elsif ($status == 200) {
-                $self->parse_github_events($data);
-            }
-            else {
-                log_error("got a status: $status");
-                return $poll->send(5 * ONE_MINUTE);
-            }
-            return $poll->send($poll_interval);
-        };
+    $self->_check_ratelimit($h);
 
+    if ($status == 304) {
+        log_debug('nothing has changed');
+    }
+    elsif ($status == 200) {
+        $self->parse_github_events($data);
+    }
+    else {
+        log_error("got a status: $status");
+        $self->interval(5 * ONE_MINUTE);
+        return;
+    }
+}
+
+sub _check_ratelimit {
+    my ($self, $h) = @_;
+    state $polls_remaining;
+
+    if (defined(my $rem = $h->{'x-ratelimit-remaining'})) {
+        if (not defined $polls_remaining) {
+            log_info("initial rate limit: $rem");
+        }
+        elsif ($rem != $polls_remaining) {
+            log_error("changed rate limit to $rem");
+        }
+        $polls_remaining = $rem;
+    }
+    else {
+        undef $polls_remaining;
+    }
+
+    if (defined $polls_remaining and $polls_remaining == 0) {
+        undef $polls_remaining;
+        log_error('ratelimit exceeded, we are banned from github');
+        my $unbanned_after = $h->{'x-ratelimit-reset'} - time;
+        $self->interval($unbanned_after);
         return;
     }
 }
