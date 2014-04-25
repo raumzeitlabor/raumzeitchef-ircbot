@@ -116,9 +116,11 @@ sub poll_github_events {
     my ($self) = @_;
     my $etag = $self->etag;
 
-    http_get $event_uri, ($etag && (headers => { 'If-None-Match' => $etag })), sub {
-        $self->handle_response(@_);
-    };
+    http_get(
+        $event_uri, timeout => 10,
+        ($etag && (headers => { 'If-None-Match' => $etag })),
+        sub { $self->handle_response(@_) }
+    );
     return;
 }
 
