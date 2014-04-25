@@ -29,9 +29,14 @@ action 'linkinfo', match => qr#(?<url>$re)#, sub {
         on_body => sub {
             my ($data, $headers) = @_;
 
+            my $status = $headers->{Status};
             # return unless defined $data;
-            if ($headers->{Status} !~ m/^2/ && $headers->{Status} !~ m/^59/) {
-                $self->say('LinkInfo error: '.$headers->{Status}." ".status_message($headers->{Status}));
+            if ($status !~ m/^2/) {
+                my $internal_err = $status =~ m/^59/;
+                my $err_msg = "LinkInfo: error $status;";
+                my $reason = $headers->{Reason} || status_message($status);
+
+                $self->say("$err_msg $reason");
                 return 0;
             }
 
