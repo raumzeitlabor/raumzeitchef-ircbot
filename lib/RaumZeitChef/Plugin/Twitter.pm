@@ -49,6 +49,12 @@ sub lookup_tweet_text {
     my ($tree) = @_;
     my $content = $tree->look_down(_tag => 'p', class => 'e-entry-title')
         or return;
+
+    for my $link (
+        $content->look_down(_tag => 'a', class => 'link customisable')
+    ) {
+        $link->replace_with($link->attr('data-expanded-url'));
+    }
     return $content->as_trimmed_text;
 }
 
