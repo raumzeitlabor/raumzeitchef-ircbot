@@ -1,4 +1,4 @@
-package RaumZeitChef::Plugin::URITitle;
+package RaumZeitChef::Plugin::LinkInfo;
 use RaumZeitChef::Plugin;
 use v5.14;
 use utf8;
@@ -19,7 +19,7 @@ use Encode qw/decode_utf8/;
 # derp.
 (my $re = $RE{URI}{HTTP}) =~ s/http/https?/;
 
-action 'urititle', match => qr#(?<url>$re)#, sub {
+action 'linkinfo', match => qr#(?<url>$re)#, sub {
     my ($self, $ircmsg, $match) = @_;
     my $data_read = 0;
     my $partial_body = '';
