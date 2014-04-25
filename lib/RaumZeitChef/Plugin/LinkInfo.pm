@@ -31,7 +31,7 @@ action 'linkinfo', match => qr#(?<url>$re)#, sub {
 
             # return unless defined $data;
             if ($headers->{Status} !~ m/^2/ && $headers->{Status} !~ m/^59/) {
-                $self->say('[Link Info] error: '.$headers->{Status}." ".status_message($headers->{Status}));
+                $self->say('LinkInfo error: '.$headers->{Status}." ".status_message($headers->{Status}));
                 return 0;
             }
 
@@ -41,8 +41,8 @@ action 'linkinfo', match => qr#(?<url>$re)#, sub {
                 state $off_start ||= pos $partial_body;
                 if ($partial_body =~ m#</title>#igsc) {
                     my $len = pos($partial_body) - length('</title>') - $off_start;
-                    my $too_long = $len > 72;
-                    $len = 72 if $too_long;
+                    my $too_long = $len > 320;
+                    $len = 320 if $too_long;
                     my $title = substr $partial_body, $off_start, $len;
                     for ($title) {
                         # XXX decode correct encoding
@@ -51,7 +51,7 @@ action 'linkinfo', match => qr#(?<url>$re)#, sub {
                         s/\s+/ /sg;
                     }
                     $title .= '…' if $too_long;
-                    $self->say("[Link Info] $title");
+                    $self->say("[$title]");
                     return 0;
                 }
             }
