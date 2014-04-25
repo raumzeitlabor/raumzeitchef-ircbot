@@ -16,6 +16,7 @@ requires 'JSON::XS';
 requires 'List::MoreUtils';
 requires 'Log::Dispatch';
 requires 'HTML::Parser';
+requires 'HTML::Tree';
 requires 'HTTP::Message';
 requires 'Moose';
 requires 'MooseX::ClassAttribute';
