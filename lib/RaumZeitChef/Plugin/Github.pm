@@ -67,28 +67,38 @@ sub _parse_one_github_event {
 
     if ($type eq 'PushEvent') {
         my @commits = @{ $e->{payload}{commits} };
+        my $last_commit = $commits[-1];
         # only show the first line of the last commit
-        my ($last_msg) = $commits[-1]{message} =~ /^([^\n]+)/;
+        my ($last_msg) = $last_commit->{message} =~ /^([^\n]+)/;
 
+        my $url = _api_to_html_url($last_commit->{url});
         my $num_commits = @commits > 1 ? "(and $#commits more) " : '';
 
-        # transform the API URI to the HTML one
-        my $uri = URI->new($commits[-1]{url});
-        $uri->host('github.com');
-        my @segments = $uri->path_segments;
-        # 0 is the empty string (because it's an absolute path),
-        # 1 is 'repos', 2, 3 is login and pathname, 4 is 'commits', 5 is sha
-        $uri->path_segments(@segments[0, 2, 3], 'commit', $segments[5]);
-
-        return "±$repo: “$last_msg” " . $num_commits . "@ $uri (by $nick)";
+        return "±$repo: “$last_msg” " . $num_commits . "@ $url (by $nick)";
     }
     elsif ($type eq 'ForkEvent') {
-        return "±$repo: forked to $e->{payload}{forkee}{html_url} (by $nick)";
+        my $url = $e->{payload}{forkee}{html_url};
+        return "±$repo: forked to $url (by $nick)";
     }
     elsif ($type eq 'CreateEvent') {
         # XXX this is broken, see maikfs prrrrring event
         # $text = "±$repo: created "
     }
+}
+
+sub _api_to_html_url {
+    my ($url) = @_;
+
+    my $uri = URI->new($url);
+    $uri->host('github.com');
+    my @segments = $uri->path_segments;
+
+    # 0 is the empty string (because it's an absolute path),
+    # 1 is 'repos', 2, 3 is login and pathname, 4 is 'commits', 5 is sha
+    $uri->path_segments(@segments[0, 2, 3], 'commit', $segments[5]);
+
+    # return a string, not the object
+    return "$uri";
 }
 
 sub poll_github_events {
