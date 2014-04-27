@@ -12,13 +12,11 @@ use File::Basename ();
 use AnyEvent;
 use Moose;
 
+use RaumZeitChef::Config;
 use RaumZeitChef::Log;
 use RaumZeitChef::PluginFactory;
 use RaumZeitChef::PluginSuperClass;
 
-
-has [qw/server port nick channel nickserv_pw/] =>
-    (is => 'ro', required => 1);
 
 has cv => (is => 'rw', default => sub { AE::cv });
 
@@ -27,6 +25,11 @@ has plugin_factory => (
     default => sub { RaumZeitChef::PluginFactory->new },
 );
 
+has config => (
+    is => 'ro',
+    required => 1,
+    handles => [qw/server port nick channel nickserv_password/],
+);
 
 # load base roles
 # with("RaumZeitChef::$_") for qw/IRC HTTPD/;

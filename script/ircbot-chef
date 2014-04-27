@@ -10,13 +10,13 @@ use Getopt::Long;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use RaumZeitChef;
+use RaumZeitChef::Config;
 
 my %options = (
     server => 'irc.hackint.net',
     port => 6667,
     nick => 'RaumZeitChef',
     channel => '#raumzeitlabor',
-    nickserv_pw => delete $ENV{IRCBOT_CHEF_NICKSERV}, # export in /etc/default/ircbot-chef
 );
 
 GetOptions(
@@ -34,4 +34,5 @@ GetOptions(
     }
 );
 
-RaumZeitChef->new(%options)->run();
+my $config = RaumZeitChef::Config->new(%options);
+RaumZeitChef->new(config => $config)->run();

@@ -42,7 +42,7 @@ event connect => sub {
 event registered => sub {
     my ($self, $irc) = @_;
     log_info('Connected, joining channel');
-    if (my $pw = $self->nickserv_pw) {
+    if (my $pw = $self->nickserv_password) {
         $irc->send_srv(PRIVMSG => 'NickServ', (join ' ', 'identify', $self->nick, $pw));
     }
     $irc->send_srv(JOIN => $self->channel);

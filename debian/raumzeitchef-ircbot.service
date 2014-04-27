@@ -2,7 +2,7 @@
 Description=RaumZeitChef IRC Bot
 
 [Service]
-User=nobody
+User=raumzeitchef
 ExecStart=/usr/bin/ircbot-chef 
 
 [Install]
