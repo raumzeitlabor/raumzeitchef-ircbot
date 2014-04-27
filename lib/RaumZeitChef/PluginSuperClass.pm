@@ -10,5 +10,6 @@ no MooseX::ClassAttribute;
 
 # XXX uhm, i guess that works, but it's just uber hacky
 sub say { goto \&RaumZeitChef::IRC::say }
+sub send_after_joined { goto \&RaumZeitChef::IRC::send_after_joined }
 
 1;
