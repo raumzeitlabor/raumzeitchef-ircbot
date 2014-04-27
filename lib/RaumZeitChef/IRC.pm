@@ -103,7 +103,34 @@ event publicmsg => sub {
 
 sub say {
     my ($self, $msg) = @_;
-    $self->irc->send_long_message('utf8', 0, 'PRIVMSG', $self->channel, $msg);
+
+    my $channel = $self->channel;
+    $self->send_after_joined(send_long_message => 'utf8', 0, 'PRIVMSG', $channel, $msg);
+}
+
+# defers method calls on ->irc until we joined our ->channel
+sub send_after_joined {
+    my ($self, $method, @args) = @_;
+
+    my $channel = $self->channel;
+
+    return $self->irc->$method(@args)
+        if $self->irc->channel_list($channel);
+
+    # XXX unusable right now, need to walk the stackframes
+    # XXX to filter out RaumZeitChef::IRC::say
+    my (undef, $file, $line) = caller;
+    log_debug("deferred say, called from $file:$line");
+
+    my $defer;
+    $defer = sub {
+        $self->irc->$method(@args);
+        $self->irc->unreg_cb($defer);
+        # get rid (hopefully) of the circular dependency
+        undef $defer;
+    };
+
+    $self->irc->reg_cb(join => $defer);
 }
 
 no Moose::Role;

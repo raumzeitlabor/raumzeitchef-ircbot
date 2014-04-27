@@ -8,9 +8,7 @@ class_has [qw/channel nick/], is => 'ro';
 no Moose;
 no MooseX::ClassAttribute;
 
-sub say {
-    my ($self, $msg) = @_;
-    $self->irc->send_long_message('utf8', 0, 'PRIVMSG', $self->channel, $msg);
-}
+# XXX uhm, i guess that works, but it's just uber hacky
+sub say { goto \&RaumZeitChef::IRC::say }
 
 1;

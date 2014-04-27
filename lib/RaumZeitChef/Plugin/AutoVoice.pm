@@ -113,7 +113,8 @@ sub set_voice {
     # voice at most 4 nicks
     my $iter = natatime 4, @nicks;
     while (my @part = $iter->()) {
-        $self->irc->send_msg(join ' ', 'MODE', $self->channel, ('+' . ('v' x @part)), @part);
+        my $voice = join ' ', 'MODE', $self->channel, ('+' . ('v' x @part)), @part;
+        $self->send_after_joined(send_msg => $voice);
     }
 }
 
@@ -125,7 +126,8 @@ sub remove_voice {
     # devoice at most 4 nicks
     my $iter = natatime 4, @nicks;
     while (my @part = $iter->()) {
-        $self->irc->send_msg(join ' ', 'MODE', $self->channel, ('-' . ('v' x @part)), @part);
+        my $devoice = join ' ', 'MODE', $self->channel, ('-' . ('v' x @part)), @part;
+        $self->send_after_joined(send_msg => $devoice);
     }
 }
 
