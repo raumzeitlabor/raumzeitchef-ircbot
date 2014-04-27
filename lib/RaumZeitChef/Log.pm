@@ -30,18 +30,32 @@ Moose::Exporter->setup_import_methods(
 
 sub _mk_log_function {
     my ($sub_name, $level) = @_;
-    my $sub = sprintf << 'EOC', $sub_name, $level;
+    my $sub = sprintf << 'EOC', __LINE__ + 1, __FILE__, $sub_name, $level;
+#line %d %s
         sub %s {
             my $meta = shift;
-            # append a newline, if it isn't there
-            # XXX there has to be a nicer way to do this
-            chomp(my $msg = "@_");
-            $msg .= "\n";
 
+            my @lines;
+            push @lines, split /\n/, $_ for @_;
+
+            my $prefix = $meta->name;
+            $prefix =~ s/^RaumZeitChef:://;
+            $prefix .= ': ';
+            my $indent = ' ' x length $prefix;
+
+            $lines[0] = $prefix . $lines[0];
+            for my $line (@lines[1 .. $#lines]) {
+                $line = $indent . $line;
+            }
+
+            my $msg = join "\n", @lines;
+            $msg .= "\n";
             $LOG->log(level => "%s", message => $msg);
         }
 EOC
+    local $@;
     eval $sub;
+    die $@ if $@;
 }
 
 
