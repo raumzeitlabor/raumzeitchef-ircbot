@@ -114,7 +114,7 @@ sub set_voice {
     my $iter = natatime 4, @nicks;
     while (my @part = $iter->()) {
         my $voice = join ' ', 'MODE', $self->channel, ('+' . ('v' x @part)), @part;
-        $self->send_after_joined(send_msg => $voice);
+        $self->call_after_oped(send_msg => $voice);
     }
 }
 
@@ -127,7 +127,7 @@ sub remove_voice {
     my $iter = natatime 4, @nicks;
     while (my @part = $iter->()) {
         my $devoice = join ' ', 'MODE', $self->channel, ('-' . ('v' x @part)), @part;
-        $self->send_after_joined(send_msg => $devoice);
+        $self->call_after_oped(send_msg => $devoice);
     }
 }
 

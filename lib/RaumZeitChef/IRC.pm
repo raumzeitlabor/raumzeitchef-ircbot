@@ -105,11 +105,11 @@ sub say {
     my ($self, $msg) = @_;
 
     my $channel = $self->channel;
-    $self->send_after_joined(send_long_message => 'utf8', 0, 'PRIVMSG', $channel, $msg);
+    $self->call_after_joined(send_long_message => 'utf8', 0, 'PRIVMSG', $channel, $msg);
 }
 
 # defers method calls on ->irc until we joined our ->channel
-sub send_after_joined {
+sub call_after_joined {
     my ($self, $method, @args) = @_;
 
     my $channel = $self->channel;
@@ -120,7 +120,7 @@ sub send_after_joined {
     # XXX unusable right now, need to walk the stackframes
     # XXX to filter out RaumZeitChef::IRC::say
     my (undef, $file, $line) = caller;
-    log_debug("deferred say, called from $file:$line");
+    log_debug("deferred $method, called from $file:$line");
 
     my $defer;
     $defer = sub {
@@ -132,6 +132,47 @@ sub send_after_joined {
 
     $self->irc->reg_cb(join => $defer);
 }
+
+# defers method calls on ->irc until we got +o in ->channel
+sub call_after_oped {
+    my ($self, $method, @args) = @_;
+
+    my $channel = $self->channel;
+    my $mode = $self->irc->nick_modes($channel, $self->irc->nick);
+    # channel_nickmode_update
+    return $self->irc->$method(@args)
+        if $mode and $mode->{o};
+
+    my (undef, $file, $line) = caller;
+    my $method_called_from = "$method, called from $file:$line";
+    log_debug("deferred $method_called_from");
+
+    my $defer;
+    $defer = sub {
+        my (undef, $dest) = @_;
+
+        if ($dest ne $self->irc->nick) {
+            log_debug("waiting for op, got '$dest' [$method_called_from]");
+            return;
+        }
+
+        my $mode = $self->irc->nick_modes($channel, $self->irc->nick);
+        unless ($mode and $mode->{o}) {
+            log_debug("still waiting for op [$method_called_from]");
+            return;
+        }
+
+        log_debug("got op, calling $method_called_from");
+
+        $self->irc->$method(@args);
+        $self->irc->unreg_cb($defer);
+        # get rid (hopefully) of the circular dependency
+        undef $defer;
+    };
+
+    $self->irc->reg_cb(channel_nickmode_update => $defer);
+}
+
 
 no Moose::Role;
 
