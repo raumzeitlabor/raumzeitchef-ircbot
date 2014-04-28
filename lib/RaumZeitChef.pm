@@ -19,8 +19,8 @@ use RaumZeitChef::PluginFactory;
 use RaumZeitChef::PluginSuperClass;
 
 has plugin_factory => (
-    is => 'ro',
-    default => sub { RaumZeitChef::PluginFactory->new },
+    is => 'rw',
+    isa => 'RaumZeitChef::PluginFactory',
 );
 
 has config => (
@@ -40,8 +40,7 @@ sub run {
     my $port = $self->port;
 
     my $irc = RaumZeitChef::IRC->new(config => $self->config, chef => $self);
-    RaumZeitChef::PluginSuperClass->meta->set_class_attribute_value(config => $self->config);
-    RaumZeitChef::PluginSuperClass->meta->set_class_attribute_value(irc => $irc);
+    $self->plugin_factory(RaumZeitChef::PluginFactory->new(config => $self->config, irc => $irc));
 
     log_info('Starting up');
 

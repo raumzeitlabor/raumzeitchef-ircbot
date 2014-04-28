@@ -7,6 +7,8 @@ use Moose;
 use MooseX::ClassAttribute;
 use RaumZeitChef::Log;
 
+has [qw/config irc/], is => 'ro', required => 1;
+
 has plugins => (
     traits => ['Hash'],
     is => 'rw',
@@ -39,6 +41,13 @@ class_has BeforeActions => (
 
 no Moose;
 no MooseX::ClassAttribute;
+
+sub BUILD {
+    my ($self) = @_;
+
+    RaumZeitChef::PluginSuperClass->meta->set_class_attribute_value($_ => $self->$_)
+        for qw/config irc/;
+}
 
 sub add_before_action {
     my ($class, $key, $action) = @_;
