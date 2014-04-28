@@ -10,9 +10,10 @@ has 'config_filename' => (
 
 my %defaults = (
     server => 'irc.hackint.net',
-    port => 6667,
+    port => 9999,
     nick => 'RaumZeitChef',
     channel => '#raumzeitlabor',
+    tls => 1,
 );
 
 for my $name (keys %defaults) {

@@ -20,6 +20,7 @@ GetOptions(\%options,
     'channel=s',
     'server=s',
     'port=i',
+    'tls!',
     'version' => sub {
         say "ircbot-chef v$RaumZeitChef::VERSION";
         exit 0;

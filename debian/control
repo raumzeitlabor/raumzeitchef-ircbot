@@ -16,6 +16,7 @@ Build-Depends-Indep: libanyevent-http-perl,
  liblog-dispatch-perl,
  libmoose-perl,
  libmoosex-classattribute-perl,
+ libnet-ssleay-perl,
  liburi-perl,
  perl (>= 5.15.2)
 Standards-Version: 3.9.2
@@ -37,6 +38,7 @@ Depends: ${misc:Depends}, ${perl:Depends},
  liblog-dispatch-perl,
  libmoose-perl,
  libmoosex-classattribute-perl,
+ libnet-ssleay-perl,
  liburi-perl,
  perl (>= 5.14.0)
 Description: RaumZeitChef IRC bot

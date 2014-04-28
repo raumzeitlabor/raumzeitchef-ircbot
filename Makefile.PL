@@ -20,6 +20,7 @@ requires 'HTML::Tree';
 requires 'HTTP::Message';
 requires 'Moose';
 requires 'MooseX::ClassAttribute';
+requires 'Net::SSLeay';
 requires 'URI';
 
 install_script 'ircbot-chef';
