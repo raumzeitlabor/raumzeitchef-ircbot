@@ -42,7 +42,7 @@ sub _laborant_part {
 }
 
 event join => sub {
-    my ($self, $irc, $nick, $channel, $is_myself) = @_;
+    my ($self, $nick, $channel, $is_myself) = @_;
     if ($is_myself) {
         # enter the event loop one more time, since channel_list isn't up to date
         state $t = AnyEvent->timer(after => 0.5, cb => sub {

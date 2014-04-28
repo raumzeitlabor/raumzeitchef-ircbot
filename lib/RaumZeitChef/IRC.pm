@@ -49,14 +49,17 @@ sub BUILD {
             Carp::carp("error while making RaumZeitChef::IRC::Event: unrecognized $event_pkg");
         }
 
-        $self->_client->reg_cb($name => sub { $obj->$cb(@_) });
+        $self->_client->reg_cb($name => sub {
+            shift; # don't leak AnyEvent::IRC::Client object
+            $obj->$cb(@_)
+        });
         log_debug("registered event $name");
     }
 
 }
 
 event connect => sub {
-    my ($self, $irc, $err) = @_;
+    my ($self, $err) = @_;
     return unless defined $err;
 
     log_info("Connect error: $err");
@@ -64,7 +67,8 @@ event connect => sub {
 };
 
 event registered => sub {
-    my ($self, $irc) = @_;
+    my ($self) = @_;
+    my $irc = $self->_client;
     log_info('Connected, joining channel');
     if (my $pw = $self->nickserv_password) {
         $irc->send_srv(PRIVMSG => 'NickServ', (join ' ', 'identify', $self->nick, $pw));
@@ -91,21 +95,23 @@ event registered => sub {
 };
 
 event disconnect => sub {
-    my ($self, $irc, $reason) = @_;
+    my ($self, $reason) = @_;
     log_critical("disconnected from server: '$reason'");
     $self->disconnect_cv->send;
 };
 
 event error => sub {
-    my ($self, $irc, $code, $msg) = @_;
+    my ($self, $code, $msg) = @_;
     if ($code ne 'ERROR') {
         $code = AnyEvent::IRC::Util::rfc_code_to_name($code);
     }
     log_error("got error message from server: $code '$msg'");
+
+    # TODO: read RFC 1459 and confirm we want to disconnect here
 };
 
 event publicmsg => sub {
-    my ($self, $irc, $channel, $ircmsg) = @_;
+    my ($self, $channel, $ircmsg) = @_;
     my $line = $ircmsg->{params}->[1];
     my $text = decode_utf8($line); # decode_n_filter($line);
     my $from_nick = decode_utf8(prefix_nick($ircmsg->{prefix}));
