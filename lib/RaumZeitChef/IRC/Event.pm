@@ -12,6 +12,7 @@ package RaumZeitChef::Trait::IRC::Event {
     BEGIN { $event_trait = __PACKAGE__ }
 
     has event_name => (is => 'ro', isa => 'Str', required => 1);
+    has event_package => (is => 'ro', isa => 'Str', required => 1);
     has code => (is => 'ro', isa => 'CodeRef', required => 1);
 
     no Moose::Role;
@@ -29,11 +30,12 @@ sub import {
 }
 
 sub event {
-    my (undef, $name, $cb) = @_;
+    my ($meta, $name, $cb) = @_;
 
     my %param = (
         is => 'bare',
         event_name => $name,
+        event_package => $meta->name,
         traits => [$event_trait],
         code => $cb,
     );

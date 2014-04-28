@@ -12,13 +12,11 @@ use File::Basename ();
 use AnyEvent;
 use Moose;
 
+use RaumZeitChef::IRC;
 use RaumZeitChef::Config;
 use RaumZeitChef::Log;
 use RaumZeitChef::PluginFactory;
 use RaumZeitChef::PluginSuperClass;
-
-
-has cv => (is => 'rw', default => sub { AE::cv });
 
 has plugin_factory => (
     is => 'ro',
@@ -27,13 +25,13 @@ has plugin_factory => (
 
 has config => (
     is => 'ro',
+    isa => 'RaumZeitChef::Config',
     required => 1,
     handles => [qw/server port nick channel nickserv_password/],
 );
 
 # load base roles
 # with("RaumZeitChef::$_") for qw/IRC HTTPD/;
-with 'RaumZeitChef::IRC';
 
 sub run {
     my ($self) = @_;
@@ -41,8 +39,9 @@ sub run {
     my $server = $self->server;
     my $port = $self->port;
 
-    RaumZeitChef::PluginSuperClass->meta->set_class_attribute_value($_, $self->$_)
-        for qw/nick channel irc/;
+    my $irc = RaumZeitChef::IRC->new(config => $self->config, chef => $self);
+    RaumZeitChef::PluginSuperClass->meta->set_class_attribute_value(config => $self->config);
+    RaumZeitChef::PluginSuperClass->meta->set_class_attribute_value(irc => $irc);
 
     log_info('Starting up');
 
@@ -55,11 +54,8 @@ sub run {
         for my $host (@hosts) {
             log_info("Connecting to $host as $nick...");
 
-            $self->irc->connect($host, $port, { nick => $nick, user => $nick });
-            $self->cv->recv;
-
-            $self->cv(AE::cv);
-
+            $irc->_client->connect($host, $port, { nick => $nick, user => $nick });
+            $irc->wait_for_disconnect;
         }
         # Wait 5 seconds before reconnecting, else we might get banned
         log_info('Connection lost.');

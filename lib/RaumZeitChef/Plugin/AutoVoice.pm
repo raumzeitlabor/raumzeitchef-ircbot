@@ -9,6 +9,8 @@ use List::Util qw/first/;
 
 no if $] >= 5.018, warnings => "experimental::smartmatch";
 
+# FIXME doesn't automatically detect when a new MAC is added to benutzerdb
+
 has raumstatus => (
     is => 'ro',
     default => sub {
@@ -45,6 +47,11 @@ event join => sub {
         # enter the event loop one more time, since channel_list isn't up to date
         state $t = AnyEvent->timer(after => 0.5, cb => sub {
             my @members = $self->benutzerdb_to_channel($self->raumstatus->members);
+            if (not @members) {
+                log_debug('no members in channel');
+                return;
+            }
+
             log_debug("members after join: @members");
 
             $self->set_voice(
@@ -77,7 +84,7 @@ sub has_mode {
     my ($want, $mode_char) = $mode =~ /(.)(.)/;
     $want = $want eq '+' ? 1 : 0;
 
-    my $m = $self->irc->nick_modes($chan, $_);
+    my $m = $self->irc->_client->nick_modes($chan, $_);
 
     return unless $m;
     return ($m->{$mode_char} ? 1 : 0) == $want
@@ -85,7 +92,7 @@ sub has_mode {
 
 sub list_channel_nicks {
     my ($self) = @_;
-    my %nicks = %{ $self->irc->channel_list($self->channel) || {} };
+    my %nicks = %{ $self->irc->_client->channel_list($self->channel) || {} };
     return keys %nicks;
 }
 
@@ -95,7 +102,7 @@ sub benutzerdb_to_channel {
     my ($self, @members) = @_;
     my @nicks = $self->list_channel_nicks;
 
-    return map {
+    return grep { defined } map {
         my $member = $_;
         first { _normalize_channick($_) eq lc $member } @nicks
     } @members

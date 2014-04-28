@@ -2,7 +2,7 @@ package RaumZeitChef::IRC;
 use v5.14;
 use utf8;
 
-use Moose::Role;
+use Moose;
 use RaumZeitChef::IRC::Event;
 
 use RaumZeitChef::Log;
@@ -12,11 +12,23 @@ use Encode 'decode_utf8';
 use AnyEvent::IRC::Util 'prefix_nick';
 use AnyEvent::IRC::Client;
 
-has irc => (is => 'ro', default => sub { AnyEvent::IRC::Client->new });
+has '_client' => (is => 'ro', default => sub { AnyEvent::IRC::Client->new });
+has 'disconnect_cv' => (is => 'rw', default => sub { AE::cv });
 
-before run => sub {
+has config => (
+    is => 'ro',
+    isa => 'RaumZeitChef::Config',
+    required => 1,
+    handles => [qw/server port nick channel nickserv_password/],
+);
+
+has chef => (is => 'ro');
+
+no Moose;
+
+sub BUILD {
     my ($self) = @_;
-    $self->irc->set_exception_cb(sub {
+    $self->_client->set_exception_cb(sub {
         my ($e, $event) = @_;
         Carp::cluck("caught exception in event '$event': $e");
     });
@@ -25,18 +37,30 @@ before run => sub {
         next unless $attr->does('RaumZeitChef::Trait::IRC::Event');
         my $name = $attr->event_name;
         my $cb = $attr->code;
-        $self->irc->reg_cb($name => sub { $self->$cb(@_) });
+        my $obj;
+        my $event_pkg = $attr->event_package;
+        if ($event_pkg eq $self->meta->name) {
+            $obj = $self;
+        }
+        elsif (my $plugin_obj = $self->chef->plugin_factory->get_plugin_instance($event_pkg)) {
+            $obj = $plugin_obj;
+        }
+        else {
+            Carp::carp("error while making RaumZeitChef::IRC::Event: unrecognized $event_pkg");
+        }
+
+        $self->_client->reg_cb($name => sub { $obj->$cb(@_) });
         log_debug("registered event $name");
     }
 
-};
+}
 
 event connect => sub {
     my ($self, $irc, $err) = @_;
     return unless defined $err;
 
     log_info("Connect error: $err");
-    $self->cv->send;
+    $self->disconnect_cv->send;
 };
 
 event registered => sub {
@@ -56,9 +80,9 @@ event registered => sub {
     # nick-collision), we try to rename every once in a while.
     my $nc_timer;
     $nc_timer = AnyEvent->timer(interval => 30, cb => sub {
-        if ($irc->nick() ne $self->nick) {
+        if ($irc->nick ne $self->config->nick) {
             log_info('trying to get back my nick...');
-            $irc->send_srv('NICK', $self->nick);
+            $irc->send_srv('NICK', $self->config->nick);
         } else {
             log_info('got my nick back.');
             $nc_timer = undef;
@@ -66,7 +90,7 @@ event registered => sub {
     });
 };
 
-event disconnect => sub { shift->cv->send };
+event disconnect => sub { shift->disconnect_cv->send };
 
 event publicmsg => sub {
     my ($self, $irc, $channel, $ircmsg) = @_;
@@ -76,7 +100,7 @@ event publicmsg => sub {
 
     # for now, commands cannot be added at runtime
     # so it is okay to cache them
-    state $actions ||= $self->plugin_factory->build_all_actions;
+    state $actions = $self->chef->plugin_factory->build_all_actions;
 
     for my $act (@$actions) {
         my ($rx, $cb) = @$act;
@@ -101,6 +125,15 @@ event publicmsg => sub {
     #}
 };
 
+sub wait_for_disconnect {
+    my ($self) = @_;
+
+    # XXX $err not used yet
+    my $err = $self->disconnect_cv->recv;
+    $self->disconnect_cv(AE::cv);
+    return $err;
+}
+
 sub say {
     my ($self, $msg) = @_;
 
@@ -114,8 +147,8 @@ sub call_after_joined {
 
     my $channel = $self->channel;
 
-    return $self->irc->$method(@args)
-        if $self->irc->channel_list($channel);
+    return $self->_client->$method(@args)
+        if $self->_client->channel_list($channel);
 
     # XXX unusable right now, need to walk the stackframes
     # XXX to filter out RaumZeitChef::IRC::say
@@ -124,13 +157,13 @@ sub call_after_joined {
 
     my $defer;
     $defer = sub {
-        $self->irc->$method(@args);
-        $self->irc->unreg_cb($defer);
+        $self->_client->$method(@args);
+        $self->_client->unreg_cb($defer);
         # get rid (hopefully) of the circular dependency
         undef $defer;
     };
 
-    $self->irc->reg_cb(join => $defer);
+    $self->_client->reg_cb(join => $defer);
 }
 
 # defers method calls on ->irc until we got +o in ->channel
@@ -138,9 +171,9 @@ sub call_after_oped {
     my ($self, $method, @args) = @_;
 
     my $channel = $self->channel;
-    my $mode = $self->irc->nick_modes($channel, $self->irc->nick);
+    my $mode = $self->_client->nick_modes($channel, $self->_client->nick);
     # channel_nickmode_update
-    return $self->irc->$method(@args)
+    return $self->_client->$method(@args)
         if $mode and $mode->{o};
 
     my (undef, $file, $line) = caller;
@@ -149,14 +182,14 @@ sub call_after_oped {
 
     my $defer;
     $defer = sub {
-        my (undef, $dest) = @_;
+        my ($irc, $channel, $dest) = @_;
 
-        if ($dest ne $self->irc->nick) {
+        if ($dest ne $self->_client->nick) {
             log_debug("waiting for op, got '$dest' [$method_called_from]");
             return;
         }
 
-        my $mode = $self->irc->nick_modes($channel, $self->irc->nick);
+        my $mode = $self->_client->nick_modes($channel, $self->_client->nick);
         unless ($mode and $mode->{o}) {
             log_debug("still waiting for op [$method_called_from]");
             return;
@@ -164,16 +197,13 @@ sub call_after_oped {
 
         log_debug("got op, calling $method_called_from");
 
-        $self->irc->$method(@args);
-        $self->irc->unreg_cb($defer);
+        $self->_client->$method(@args);
+        $self->_client->unreg_cb($defer);
         # get rid (hopefully) of the circular dependency
         undef $defer;
     };
 
-    $self->irc->reg_cb(channel_nickmode_update => $defer);
+    $self->_client->reg_cb(channel_nickmode_update => $defer);
 }
-
-
-no Moose::Role;
 
 1;

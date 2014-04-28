@@ -20,7 +20,7 @@ my $disable_bell = undef;
 action ping => sub {
     my ($self, $msg, $match) = @_;
     my ($cmd, $rest) = ($match->{cmd}, $match->{rest});
-    my $irc = $self->irc;
+
     if ((time() - $last_ping) < $ping_freq) {
         log_info('!ping ignored');
         if (!$said_idiot) {
