@@ -90,7 +90,19 @@ event registered => sub {
     });
 };
 
-event disconnect => sub { shift->disconnect_cv->send };
+event disconnect => sub {
+    my ($self, $irc, $reason) = @_;
+    log_critical("disconnected from server: '$reason'");
+    $self->disconnect_cv->send;
+};
+
+event error => sub {
+    my ($self, $irc, $code, $msg) = @_;
+    if ($code ne 'ERROR') {
+        $code = AnyEvent::IRC::Util::rfc_code_to_name($code);
+    }
+    log_error("got error message from server: $code '$msg'");
+};
 
 event publicmsg => sub {
     my ($self, $irc, $channel, $ircmsg) = @_;
