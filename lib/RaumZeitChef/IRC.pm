@@ -12,7 +12,9 @@ use Encode 'decode_utf8';
 use AnyEvent::IRC::Util 'prefix_nick';
 use AnyEvent::IRC::Client;
 
-has '_client' => (is => 'ro', default => sub { AnyEvent::IRC::Client->new });
+has '_client' => (is => 'ro', default => sub {
+    AnyEvent::IRC::Client->new(send_initial_whois => 1);
+});
 has 'disconnect_cv' => (is => 'rw', default => sub { AE::cv });
 
 has config => (
