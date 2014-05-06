@@ -30,7 +30,10 @@ action 'linkinfo', match => qr#(?<url>$re)#, sub {
             my ($data, $headers) = @_;
 
             my $status = $headers->{Status};
-            # return unless defined $data;
+
+            # we aborted in on_header, no need to do anything
+            return if $status == 598;
+
             if ($status !~ m/^2/) {
                 my $internal_err = $status =~ m/^59/;
                 my $err_msg = "LinkInfo: error $status;";
