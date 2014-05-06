@@ -59,7 +59,7 @@ action 'linkinfo', match => qr#(?<url>$re)#, sub {
                         s/\s+/ /sg;
                     }
                     $title .= '…' if $too_long;
-                    $self->say("[$title]");
+                    $self->say("LinkInfo: $title");
                     return 0;
                 }
             }
