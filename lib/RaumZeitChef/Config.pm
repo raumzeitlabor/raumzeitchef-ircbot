@@ -28,9 +28,13 @@ sub BUILD {
     my ($self) = @_;
 
     return unless open my $fh, '<', $self->config_filename;
-
-    my $config = decode_json(do { local $/; <$fh> });
+    my $data = do { local $/; <$fh> };
     close $fh;
+
+    # allow comments and trailing commata in lists
+    my $json = JSON::XS->new->relaxed(1);
+
+    my $config = $json->decode($data);
 
     for my $key (keys %$config) {
         my $attr = $self->meta->get_attribute($key)
