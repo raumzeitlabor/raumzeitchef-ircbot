@@ -23,24 +23,34 @@ action 'linkinfo', match => qr#(?<url>$re)#, sub {
     my ($self, $ircmsg, $match) = @_;
     my $data_read = 0;
     my $partial_body = '';
+
+    my $is_html;
+
     http_get($match->{url},
         timeout => 3,
-        on_header => sub { $_[0]{"content-type"} =~ /^text\/html\s*(?:;|$)/ },
+        on_header => sub {
+            my ($hdr) = @_;
+
+            # close connection if it isn't HTML
+            my $type = $hdr->{'content-type'};
+            $is_html = $type =~ /^text\/x?html \s* (?: ; | $ )/xi;
+            return $is_html;
+        },
         on_body => sub {
             my ($data, $headers) = @_;
 
+            # silently do nothing
+            return unless $is_html;
+
             my $status = $headers->{Status};
 
-            # we aborted in on_header, no need to do anything
-            return if $status == 598;
-
-            if ($status !~ m/^2/) {
-                my $internal_err = $status =~ m/^59/;
+            if (not $status =~ /^2/) {
+                my $internal_err = $status =~ /^59/;
                 my $err_msg = "LinkInfo: error $status;";
                 my $reason = $headers->{Reason} || status_message($status);
 
                 $self->say("$err_msg $reason");
-                return 0;
+                return;
             }
 
             $data_read += length $data; 
