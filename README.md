@@ -13,12 +13,19 @@ This git repository contains the source for the RaumZeitChef IRC bot.
 
 Development
 -----------
-To run the bot on your local machine, use `./script/ircbot-chef` and
-set `--channel` and `--nick` to something appropiate.
+
+WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP
+
+Currently rewriting architecture/plugin system to enable modular testing.
+In the meantime please run `./script/ircbot-chef` and set `--channel` and
+set `--nick` to something appropiate.
+
+WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP WIP
 
 
 Building a Debian package
 -------------------------
+
 The preferred way to deploy code on infra.rzl (where this bot traditionally
 runs on) is by installing a Debian package. This has many advantages:
 
