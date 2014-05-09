@@ -46,8 +46,12 @@ action 'linkinfo', match => qr#(?<url>$re)#, sub {
 
             if (not $status =~ /^2/) {
                 my $internal_err = $status =~ /^59/;
-                my $err_msg = "LinkInfo: error $status;";
-                my $reason = $headers->{Reason} || status_message($status);
+
+                my $err_msg = 'LinkInfo: ' .
+                              ($internal_err && 'Internal ') .
+                              "Error $status";
+
+                my $reason = $headers->{Reason} // status_message($status);
 
                 $self->say("$err_msg $reason");
                 return;
