@@ -2,8 +2,9 @@ package RaumZeitChef::PluginSuperClass;
 use Moose;
 use MooseX::ClassAttribute;
 
-class_has irc => (
-    is => 'ro', weak_ref => 1,
+has irc => (
+    is => 'ro',
+    weak_ref => 1,
     handles => [qw/say call_after_joined call_after_oped/]
 );
 

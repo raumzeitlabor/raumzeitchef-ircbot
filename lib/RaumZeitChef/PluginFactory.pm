@@ -3,23 +3,50 @@ package RaumZeitChef::PluginFactory;
 
 use v5.14;
 
-use Moose;
-use MooseX::ClassAttribute;
+use MooseX::Singleton;
 use RaumZeitChef::Log;
 
-has [qw/config irc/], is => 'ro', required => 1;
+has config => (
+    is => 'ro',
+    required => 1,
+);
+
+has irc => (
+    is => 'ro',
+    required => 1,
+    weak_ref => 1,
+);
 
 has plugins => (
     traits => ['Hash'],
     is => 'rw',
-    # isa => 'ArrayRef[Object]',
-    builder => '_build_plugins',
+    isa => 'HashRef[Object]',
     handles => {
         get_plugin_instance => 'get',
+        add_plugin_instance => 'set',
     },
 );
 
-class_has Actions => (
+around 'get_plugin_instance' => sub {
+    my ($orig, $self, $key) = @_;
+
+    my $value = $self->$orig($key);
+    return $value if $value;
+
+    log_error("requested plugin instance for '$key' which isn't instantiated");
+    exit -1;
+};
+
+has events => (
+    is => 'rw',
+    traits => ['Array'],
+    default => sub { [] },
+    handles => {
+        'add_irc_event' => 'push',
+    },
+);
+
+has Actions => (
     traits => ['Hash'],
     is => 'rw',
     default => sub { {} },
@@ -30,7 +57,7 @@ class_has Actions => (
     },
 );
 
-class_has BeforeActions => (
+has BeforeActions => (
     traits => ['Hash'],
     is => 'rw',
     default => sub { {} },
@@ -39,14 +66,14 @@ class_has BeforeActions => (
     }
 );
 
-no Moose;
-no MooseX::ClassAttribute;
+no MooseX::Singleton;
+
+my $PLUGIN_SUPER = 'RaumZeitChef::PluginSuperClass';
 
 sub BUILD {
     my ($self) = @_;
 
-    RaumZeitChef::PluginSuperClass->meta->set_class_attribute_value($_ => $self->$_)
-        for qw/config irc/;
+    $PLUGIN_SUPER->meta->set_class_attribute_value(config => $self->config);
 }
 
 sub add_before_action {
@@ -75,7 +102,7 @@ sub build_all_actions {
         }
     }
 
-    return [ values %wrapped ];
+    return values %wrapped;
 }
 
 sub _build_action_closure {
@@ -85,12 +112,35 @@ sub _build_action_closure {
     return sub { $o->$code_ref(@_) };
 }
 
-sub _build_plugins {
+sub build_all_events {
+    my ($self) = @_;
+
+    my $events = $self->events;
+    my @wrapped;
+    for my $event (@$events) {
+        my $name = $event->name;
+        my $sub = $event->body;
+        my $plugin = $event->plugin_name;
+
+        my $obj = $self->get_plugin_instance($plugin);
+
+        push @wrapped, [
+            $name,
+            sub {
+                shift; # don't leak AnyEvent::IRC::Client object
+                $obj->$sub(@_);
+            }
+        ];
+    }
+
+    return @wrapped;
+}
+
+sub build_plugins {
     my ($self) = @_;
     my @plugins = $self->find_plugins;
 
-    my $PLUGIN_SUPER = 'RaumZeitChef::PluginSuperClass';
-    my %instances;
+    my @instances;
     for my $p (@plugins) {
         my $pkg = $p->{package_name};
         my $short_name = $p->{short_name};
@@ -98,17 +148,24 @@ sub _build_plugins {
         log_debug("loading plugin $short_name");
 
         Class::Load::load_class($pkg);
-        my $o = $instances{$pkg} = $pkg->new;
+        my $o = $pkg->new(irc => $self->irc);
+
+        $self->add_plugin_instance($pkg => $o);
+        push @instances, $o;
 
         log_debug("instantiated $short_name");
 
         my $attr = lc $p->{short_name};
-        $PLUGIN_SUPER->meta->add_class_attribute($attr, is => 'ro', weak_ref => 1);
+        $PLUGIN_SUPER->meta->add_class_attribute(
+            $attr,
+            is => 'ro',
+            weak_ref => 1,
+        );
         $PLUGIN_SUPER->meta->set_class_attribute_value($attr, $o);
     }
 
-    $_->can('init_plugin') and $_->init_plugin for values %instances;
-    return \%instances;
+    $_->can('init_plugin') and $_->init_plugin for @instances;
+    return;
 }
 
 sub find_plugins {

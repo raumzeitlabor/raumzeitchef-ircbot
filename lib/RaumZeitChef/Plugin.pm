@@ -8,7 +8,6 @@ use Moose::Role ();
 use Moose::Exporter;
 
 use RaumZeitChef::Log;
-use RaumZeitChef::IRC::Event ();
 use RaumZeitChef::PluginSuperClass ();
 
 no Moose;
@@ -23,13 +22,25 @@ package RaumZeitChef::Meta::Action {
     no Moose;
 }
 
+package RaumZeitChef::Meta::Event {
+    use Moose;
+
+    has name => (is => 'ro', isa => 'Str', required => 1);
+    has plugin_name => (is => 'ro', isa => 'Str', required => 1);
+    has body => (is => 'ro', isa => 'CodeRef', required => 1);
+
+    no Moose;
+}
+
+
 (my $import, *unimport) = Moose::Exporter->build_import_methods(
-    with_meta => ['action', 'before_action'],
-    also => ['Moose', 'RaumZeitChef::IRC::Event', 'RaumZeitChef::Log'],
+    with_meta => ['action', 'before_action', 'event'],
+    also => ['Moose', 'RaumZeitChef::Log'],
 );
 
 sub import {
     my ($class) = @_;
+
     my $PLUGIN_SUPER = 'RaumZeitChef::PluginSuperClass';
     my $caller = caller;
 
@@ -50,7 +61,7 @@ sub action {
     );
 
     my $action = RaumZeitChef::Meta::Action->wrap($cb, %param);
-    RaumZeitChef::PluginFactory->add_action($name => $action);
+    RaumZeitChef::PluginFactory->instance->add_action($name => $action);
 }
 
 sub before_action {
@@ -66,8 +77,21 @@ sub before_action {
     );
 
     my $action = RaumZeitChef::Meta::Action->wrap($cb, %param);
-    RaumZeitChef::PluginFactory->add_before_action($name => $action);
+    RaumZeitChef::PluginFactory->instance->add_before_action($name => $action);
 }
 
+sub event {
+    my ($meta, $name, $cb) = @_;
+
+    my $plugin = $meta->name;
+    my $event = RaumZeitChef::Meta::Event->new(
+        name => $name,
+        plugin_name => $plugin,
+        body => $cb,
+    );
+
+    log_debug("added event '$name' from '$plugin'");
+    RaumZeitChef::PluginFactory->instance->add_irc_event($event);
+}
 
 1;

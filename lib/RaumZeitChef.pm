@@ -18,11 +18,6 @@ use RaumZeitChef::Log;
 use RaumZeitChef::PluginFactory;
 use RaumZeitChef::PluginSuperClass;
 
-has plugin_factory => (
-    is => 'rw',
-    isa => 'RaumZeitChef::PluginFactory',
-);
-
 has config => (
     is => 'ro',
     isa => 'RaumZeitChef::Config',
@@ -39,8 +34,23 @@ sub run {
     my $server = $self->server;
     my $port = $self->port;
 
-    my $irc = RaumZeitChef::IRC->new(config => $self->config, chef => $self);
-    $self->plugin_factory(RaumZeitChef::PluginFactory->new(config => $self->config, irc => $irc));
+    log_debug('configuration complete');
+
+    log_debug('instantiating IRC');
+    my $irc = RaumZeitChef::IRC->new(config => $self->config);
+
+    log_debug('building PluginFactory singleton');
+    my $factory = RaumZeitChef::PluginFactory->initialize(
+        config => $self->config,
+        irc => $irc,
+    );
+
+    $factory->build_plugins;
+
+    $irc->add_action($_)
+        for $factory->build_all_actions;
+    $irc->add_event($_)
+        for $factory->build_all_events;
 
     log_info('Starting up');
 

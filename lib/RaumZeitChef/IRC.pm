@@ -3,7 +3,6 @@ use v5.14;
 use utf8;
 
 use Moose;
-use RaumZeitChef::IRC::Event;
 
 use RaumZeitChef::Log;
 
@@ -15,12 +14,7 @@ use AnyEvent::IRC::Client;
 has '_client' => (
     is => 'ro',
     lazy => 1,
-    default => sub {
-        my ($self) = @_;
-        my $irc = AnyEvent::IRC::Client->new(send_initial_whois => 1);
-        $irc->enable_ssl if $self->config->tls;
-        return $irc;
-    },
+    builder => '_irc_client_builder',
 );
 
 has 'disconnect_cv' => (is => 'rw', default => sub { AE::cv });
@@ -32,51 +26,68 @@ has config => (
     handles => [qw/server port nick channel nickserv_password/],
 );
 
-has chef => (is => 'ro');
+has actions => (
+    is => 'ro',
+    required => 1,
+    traits => ['Array'],
+    default => sub { [] },
+    handles => {
+        add_action => 'push',
+    },
+);
 
 no Moose;
 
-sub BUILD {
+sub _irc_client_builder {
     my ($self) = @_;
-    $self->_client->set_exception_cb(sub {
+
+    my $irc = AnyEvent::IRC::Client->new(send_initial_whois => 1);
+
+    $irc->enable_ssl if $self->config->tls;
+
+    $irc->set_exception_cb(sub {
         my ($e, $event) = @_;
         Carp::cluck("caught exception in event '$event': $e");
     });
 
-    for my $attr ($self->meta->get_all_attributes) {
-        next unless $attr->does('RaumZeitChef::Trait::IRC::Event');
-        my $name = $attr->event_name;
-        my $cb = $attr->code;
-        my $obj;
-        my $event_pkg = $attr->event_package;
-        if ($event_pkg eq $self->meta->name) {
-            $obj = $self;
-        }
-        elsif (my $plugin_obj = $self->chef->plugin_factory->get_plugin_instance($event_pkg)) {
-            $obj = $plugin_obj;
-        }
-        else {
-            Carp::carp("error while making RaumZeitChef::IRC::Event: unrecognized $event_pkg");
-        }
+    my @callbacks = qw/connect registered disconnect error publicmsg/;
 
-        $self->_client->reg_cb($name => sub {
-            shift; # don't leak AnyEvent::IRC::Client object
-            $obj->$cb(@_)
-        });
-        log_debug("registered event $name");
+    for my $name (@callbacks) {
+        $irc->reg_cb($name => $self->_generate_cb("${name}_cb"));
     }
 
+    return $irc;
 }
 
-event connect => sub {
+sub _generate_cb {
+    my ($self, $name) = @_;
+
+    # XXX Currently we resolve the method at runtime,
+    # XXX ideally it the closure should be generated
+    # XXX at BUILD time
+    return sub {
+        shift; # don't leak AnyEvent::IRC::Client object
+        if (my $sub = $self->can($name)) {
+            $self->$sub(@_);
+        }
+    };
+}
+
+sub add_event {
+    my ($self, $event) = @_;
+
+    $self->_client->reg_cb(@$event);
+}
+
+sub connect_cb {
     my ($self, $err) = @_;
     return unless defined $err;
 
     log_info("Connect error: $err");
     $self->disconnect_cv->send;
-};
+}
 
-event registered => sub {
+sub registered_cb {
     my ($self) = @_;
     my $irc = $self->_client;
     log_info('Connected, joining channel');
@@ -102,15 +113,15 @@ event registered => sub {
             $nc_timer = undef;
         }
     });
-};
+}
 
-event disconnect => sub {
+sub disconnect_cb {
     my ($self, $reason) = @_;
     log_critical("disconnected from server: '$reason'");
     $self->disconnect_cv->send;
-};
+}
 
-event error => sub {
+sub error_cb {
     my ($self, $code, $msg) = @_;
     if ($code ne 'ERROR') {
         $code = AnyEvent::IRC::Util::rfc_code_to_name($code);
@@ -118,17 +129,15 @@ event error => sub {
     log_error("got error message from server: $code '$msg'");
 
     # TODO: read RFC 1459 and confirm we want to disconnect here
-};
+}
 
-event publicmsg => sub {
+sub publicmsg_cb {
     my ($self, $channel, $ircmsg) = @_;
     my $line = $ircmsg->{params}->[1];
     my $text = decode_utf8($line); # decode_n_filter($line);
     my $from_nick = decode_utf8(prefix_nick($ircmsg->{prefix}));
 
-    # for now, commands cannot be added at runtime
-    # so it is okay to cache them
-    state $actions = $self->chef->plugin_factory->build_all_actions;
+    my $actions = $self->actions;
 
     for my $act (@$actions) {
         my ($rx, $cb) = @$act;
@@ -151,7 +160,7 @@ event publicmsg => sub {
     #    $conn->send_chan($channel, 'PRIVMSG', ($channel, "Enter !stream <url> to set Stream."));
     #    $conn->send_chan($channel, 'PRIVMSG', ($channel, "Enter !stream to see what's playing."));
     #}
-};
+}
 
 sub wait_for_disconnect {
     my ($self) = @_;
