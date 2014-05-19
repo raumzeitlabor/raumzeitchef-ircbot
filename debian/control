@@ -17,6 +17,7 @@ Build-Depends-Indep: libanyevent-http-perl,
  libmoose-perl,
  libmoosex-classattribute-perl,
  libnet-ssleay-perl,
+ libmodule-install-perl,
  liburi-perl,
  perl (>= 5.15.2)
 Standards-Version: 3.9.2
