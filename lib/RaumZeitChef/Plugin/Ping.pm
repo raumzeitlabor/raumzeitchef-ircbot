@@ -51,13 +51,13 @@ action ping => sub {
     }
 
     $said_idiot = 0;
-    my $post;
+    my $get;
     my $epost;
     # Zuerst den Raum-Ping (Port 8 am NPM), dann den Ping
     # in der E-Ecke aktivieren (Port 3 am NPM).
-    $post = http_post 'http://172.22.36.1:5000/port/8', '1', sub {
-        log_info("Port 8 am NPM aktiviert!");
-        undef $post;
+    $get = http_get 'http://infra.rzl:8083/fhem?cmd.PCA301_053FFA=set%20PCA301_053FFA%20on&room=Hauptraum', sub {
+        log_info("FHEM: blinklampe aktiviert");
+        undef $get;
         $epost = http_post 'http://172.22.36.1:5000/port/3', '1', sub {
             log_info("Port 3 am NPM aktiviert!");
             undef $epost;
@@ -65,11 +65,11 @@ action ping => sub {
     };
     $self->say("Die Rundumleuchte wurde für 5 Sekunden aktiviert");
     $disable_timer = AnyEvent->timer(after => 5, cb => sub {
-        my $post;
+        my $get;
         my $epost;
-        $post = http_post 'http://172.22.36.1:5000/port/8', '0', sub {
-            log_info("Port 8 am NPM deaktiviert!");
-            undef $post;
+        $get = http_get 'http://infra.rzl:8083/fhem?cmd.PCA301_053FFA=set%20PCA301_053FFA%20off&room=Hauptraum', sub {
+            log_info("FHEM: blinklampe deaktiviert");
+            undef $get;
             $epost = http_post 'http://172.22.36.1:5000/port/3', '0', sub {
                 log_info("Port 3 am NPM deaktiviert!");
                 undef $epost;

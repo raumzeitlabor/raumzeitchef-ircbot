@@ -1,3 +1,9 @@
+raumzeitchef-ircbot (1.9-2) unstable; urgency=medium
+
+  * enable Blinklicht with FHEM backend
+
+ -- Simon Elsbrock <simon@iodev.org>  Sat, 24 May 2014 00:25:12 +0200
+
 raumzeitchef-ircbot (1.9-1) unstable; urgency=medium
 
   * lots and lots of changes
