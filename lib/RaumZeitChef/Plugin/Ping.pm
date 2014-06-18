@@ -31,20 +31,24 @@ action ping => sub {
         return;
     }
 
-    $last_ping = time();
-
     if ($rest =~ s/^\s*-a\s*//) {
+        # if there is no text after the arg, stop here.
+        return unless $rest;
+
         http_get 'http://infra.rzl:8083/fhem?cmd.PCA301_0FA6FF=set%20PCA301_0FA6FF%20on&room=Olymp', sub {
             log_info("FHEM: ALAAAAAAARM aktiviert");
 
-            state $timer;
+            my $timer;
             $timer = AnyEvent->timer(after => 1, cb => sub {
                 http_get 'http://infra.rzl:8083/fhem?cmd.PCA301_0FA6FF=set%20PCA301_0FA6FF%20off&room=Olymp', sub {
                     log_info("FHEM: ALAAAAAAARM deaktiviert");
+                    undef $timer;
                 }
             });
         };
     }
+
+    $last_ping = time();
 
     # Remaining text will be sent to Ping+, see:
     # https://raumzeitlabor.de/wiki/Ping+
