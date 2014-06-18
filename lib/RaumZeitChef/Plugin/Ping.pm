@@ -40,9 +40,11 @@ action ping => sub {
 
             my $timer;
             $timer = AnyEvent->timer(after => 1, cb => sub {
-                http_get 'http://infra.rzl:8083/fhem?cmd.PCA301_0FA6FF=set%20PCA301_0FA6FF%20off&room=Olymp', sub {
-                    log_info("FHEM: ALAAAAAAARM deaktiviert");
-                    undef $timer;
+                for (1..3) {
+                    http_get 'http://infra.rzl:8083/fhem?cmd.PCA301_0FA6FF=set%20PCA301_0FA6FF%20off&room=Olymp', sub {
+                        log_info("FHEM: ALAAAAAAARM deaktiviert");
+                        undef $timer;
+                    }
                 }
             });
         };
