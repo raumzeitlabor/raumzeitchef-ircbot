@@ -33,14 +33,16 @@ action ping => sub {
 
     $last_ping = time();
 
-    if ($match->{rest} =~ s/^\s*-a\s*//) {
-        $get = http_get 'http://infra.rzl:8083/fhem?cmd.PCA301_0FA6FF=set%20PCA301_0FA6FF%20on&room=Olymp', sub {
+    if ($rest =~ s/^\s*-a\s*//) {
+        http_get 'http://infra.rzl:8083/fhem?cmd.PCA301_0FA6FF=set%20PCA301_0FA6FF%20on&room=Olymp', sub {
             log_info("FHEM: ALAAAAAAARM aktiviert");
 
-            $get = http_get 'http://infra.rzl:8083/fhem?cmd.PCA301_0FA6FF=set%20PCA301_0FA6FF%20off&room=Olymp', sub {
-                log_info("FHEM: ALAAAAAAARM deaktiviert");
-                undef $get;
-            };
+            state $timer;
+            $timer = AnyEvent->timer(after => 1, cb => sub {
+                http_get 'http://infra.rzl:8083/fhem?cmd.PCA301_0FA6FF=set%20PCA301_0FA6FF%20off&room=Olymp', sub {
+                    log_info("FHEM: ALAAAAAAARM deaktiviert");
+                }
+            });
         };
     }
 
