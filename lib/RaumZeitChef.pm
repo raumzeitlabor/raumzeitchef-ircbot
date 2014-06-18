@@ -3,7 +3,7 @@
 use v5.14;
 use utf8;
 
-package RaumZeitChef 1.9;
+package RaumZeitChef 1.9.1;
 
 # These modules are in core:
 use File::Basename ();
