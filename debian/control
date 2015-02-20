@@ -20,7 +20,7 @@ Build-Depends-Indep: libanyevent-http-perl,
  libnet-ssleay-perl,
  libmodule-install-perl,
  liburi-perl,
- perl (>= 5.15.2)
+ perl (>= 5.14.0)
 Standards-Version: 3.9.2
 Homepage: https://github.com/raumzeitlabor/raumzeitchef-ircbot
 
