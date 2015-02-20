@@ -6,4 +6,4 @@ install:
 
 script:
     - mk-build-deps && dpkg -i ../raumzeitchef-ircbot-build-deps*.deb
-    - debuild -uc -us
+    - debuild -uc -us --no-tgz-check
