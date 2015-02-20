@@ -5,7 +5,5 @@ install:
     - sudo apt-get install -qq --no-install-recommends debhelper devscripts equivs
 
 script:
-    - mk-build-deps
-    - find . -maxdepth 1 -name raumzeitchef-ircbot-build-deps\*.deb -exec sudo dpkg -i {} \;
-    - sudo apt-get install -f
+    - mk-build-deps -i -r
     - debuild --no-tgz-check -uc -us
