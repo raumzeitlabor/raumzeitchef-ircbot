@@ -5,5 +5,5 @@ install:
     - sudo apt-get install -qq --no-install-recommends debhelper devscripts equivs
 
 script:
-    - mk-build-deps -i -r
+    - sudo mk-build-deps -i -r
     - debuild --no-tgz-check -uc -us
